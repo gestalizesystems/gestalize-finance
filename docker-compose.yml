@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gestalize_finance_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gestalize
+      POSTGRES_PASSWORD: gestalize
+      POSTGRES_DB: gestalize_finance
+    ports:
+      - "5433:5432"
+    volumes:
+      - gestalize_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gestalize -d gestalize_finance"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  gestalize_db_data:

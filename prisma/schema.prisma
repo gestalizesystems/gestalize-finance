@@ -1,0 +1,180 @@
+// Gestalize Finance — schema do banco
+// Modela: clientes, produtos/serviços, assinaturas recorrentes,
+// cobranças (invoices), pagamentos e custos.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------- ENUMS -----------------------------
+
+enum ClientStatus {
+  ACTIVE // ativo
+  INACTIVE // cancelado / inativo
+  DELINQUENT // inadimplente
+}
+
+enum ProductType {
+  ONE_TIME // serviço avulso / implementação
+  RECURRING // mensalidade / SaaS
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELED
+}
+
+enum InvoiceType {
+  IMPLEMENTATION // taxa de implementação (entrada única)
+  SUBSCRIPTION // mensalidade recorrente
+  EXTRA // upgrade / serviço avulso
+}
+
+enum InvoiceStatus {
+  PENDING // aguardando pagamento
+  PAID // pago
+  OVERDUE // atrasado
+  CANCELED // cancelado
+}
+
+enum PaymentMethod {
+  PIX
+  BOLETO
+  CARD
+  MANUAL // baixa manual
+}
+
+enum CostCategory {
+  PER_CLIENT // custo direto por cliente/sistema
+  API // ferramentas / APIs
+  SERVER // servidores / hospedagem
+  COMMISSION // comissões
+  FIXED // custos fixos
+  VARIABLE // custos variáveis
+  OTHER
+}
+
+// ----------------------------- MODELS -----------------------------
+
+model Client {
+  id              String       @id @default(cuid())
+  name            String
+  email           String?
+  phone           String?
+  document        String? // CPF / CNPJ
+  status          ClientStatus @default(ACTIVE)
+  notes           String?
+  asaasCustomerId String? // id do cliente no gateway
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  costs         Cost[]
+
+  @@index([status])
+}
+
+model Product {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  defaultPrice Decimal     @db.Decimal(10, 2)
+  type         ProductType @default(RECURRING)
+  active       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  costs         Cost[]
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  client      Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+  product     Product            @relation(fields: [productId], references: [id])
+  productId   String
+  amount      Decimal            @db.Decimal(10, 2)
+  cycle       BillingCycle       @default(MONTHLY)
+  dueDay      Int                @default(5) // dia do vencimento (1-28)
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime           @default(now())
+  nextDueDate DateTime
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  invoices Invoice[]
+
+  @@index([status])
+  @@index([nextDueDate])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId String?
+  product        Product?      @relation(fields: [productId], references: [id])
+  productId      String?
+  description    String
+  type           InvoiceType   @default(SUBSCRIPTION)
+  amount         Decimal       @db.Decimal(10, 2)
+  dueDate        DateTime
+  status         InvoiceStatus @default(PENDING)
+  paymentLink    String? // link de checkout do gateway
+  externalId     String? // id da cobrança no gateway
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  payments Payment[]
+
+  @@index([status])
+  @@index([dueDate])
+  @@index([clientId])
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  invoice    Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId  String
+  amount     Decimal       @db.Decimal(10, 2)
+  method     PaymentMethod @default(PIX)
+  paidAt     DateTime      @default(now())
+  externalId String?
+  createdAt  DateTime      @default(now())
+
+  @@index([invoiceId])
+}
+
+model Cost {
+  id          String       @id @default(cuid())
+  description String
+  amount      Decimal      @db.Decimal(10, 2)
+  category    CostCategory @default(OTHER)
+  recurring   Boolean      @default(false)
+  client      Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientId    String?
+  product     Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId   String?
+  date        DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([category])
+  @@index([date])
+}

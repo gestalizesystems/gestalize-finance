@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #070b16;
+  --foreground: #e5e9f5;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-ink-700/60 bg-ink-850/80 p-5 shadow-lg shadow-black/20;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .badge-pending {
+    @apply bg-warning/15 text-warning;
+  }
+  .badge-paid {
+    @apply bg-positive/15 text-positive;
+  }
+  .badge-overdue {
+    @apply bg-negative/15 text-negative;
+  }
+  .nav-item {
+    @apply flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-ink-800 hover:text-slate-100;
+  }
+  .nav-item-active {
+    @apply bg-brand text-white hover:bg-brand hover:text-white;
+  }
+  .input {
+    @apply w-full rounded-xl border border-ink-700 bg-ink-900 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-600 disabled:opacity-60;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-xl border border-ink-700 bg-ink-850 px-3.5 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-ink-800;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c2747;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

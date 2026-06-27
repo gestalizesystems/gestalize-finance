@@ -122,3 +122,108 @@ export async function getUpcomingInvoices(limit = 6) {
     include: { client: true, product: true },
   });
 }
+
+// ----------------------- RELATÓRIOS -----------------------
+
+export async function getReportData() {
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const monthEnd = endOfMonth(now);
+
+  const [
+    totalRevenueAgg,
+    mrr,
+    monthRevenue,
+    monthExpenses,
+    overdueAgg,
+    avgTicketAgg,
+    revenueByTypeRaw,
+    topClientsRaw,
+  ] = await Promise.all([
+    prisma.payment.aggregate({ _sum: { amount: true } }),
+    getMRR(),
+    revenueInRange(monthStart, monthEnd),
+    expensesInRange(monthStart, monthEnd),
+    prisma.invoice.aggregate({
+      _sum: { amount: true },
+      _count: { _all: true },
+      where: { status: "OVERDUE" },
+    }),
+    prisma.invoice.aggregate({ _avg: { amount: true }, where: { status: "PAID" } }),
+    prisma.invoice.groupBy({
+      by: ["type"],
+      _sum: { amount: true },
+      where: { status: "PAID" },
+    }),
+    prisma.invoice.groupBy({
+      by: ["clientId"],
+      _sum: { amount: true },
+      where: { status: "PAID" },
+      orderBy: { _sum: { amount: "desc" } },
+      take: 5,
+    }),
+  ]);
+
+  // Histórico 6 meses: receita, despesa, lucro
+  const months: {
+    label: string;
+    receita: number;
+    despesa: number;
+    lucro: number;
+  }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const ref = subMonths(now, i);
+    const s = startOfMonth(ref);
+    const e = endOfMonth(ref);
+    const [r, d] = await Promise.all([
+      revenueInRange(s, e),
+      expensesInRange(s, e),
+    ]);
+    months.push({
+      label: format(ref, "MMM", { locale: ptBR }).replace(".", ""),
+      receita: r,
+      despesa: d,
+      lucro: r - d,
+    });
+  }
+
+  const revenueByType = { IMPLEMENTATION: 0, SUBSCRIPTION: 0, EXTRA: 0 } as Record<
+    string,
+    number
+  >;
+  for (const row of revenueByTypeRaw)
+    revenueByType[row.type] = toNumber(row._sum.amount);
+
+  // Nomes dos top clientes
+  const clientIds = topClientsRaw.map((c) => c.clientId);
+  const clientsMap = new Map<string, string>();
+  if (clientIds.length) {
+    const clients = await prisma.client.findMany({
+      where: { id: { in: clientIds } },
+      select: { id: true, name: true },
+    });
+    for (const c of clients) clientsMap.set(c.id, c.name);
+  }
+  const topClients = topClientsRaw.map((c) => ({
+    name: clientsMap.get(c.clientId) ?? "—",
+    revenue: toNumber(c._sum.amount),
+  }));
+
+  const mrrValue = mrr;
+  return {
+    totalRevenue: toNumber(totalRevenueAgg._sum.amount),
+    mrr: mrrValue,
+    arr: mrrValue * 12,
+    netProfitMonth: monthRevenue - monthExpenses,
+    monthRevenue,
+    monthExpenses,
+    overdue: {
+      amount: toNumber(overdueAgg._sum.amount),
+      count: overdueAgg._count._all,
+    },
+    avgTicket: toNumber(avgTicketAgg._avg.amount),
+    months,
+    revenueByType,
+    topClients,
+  };
+}

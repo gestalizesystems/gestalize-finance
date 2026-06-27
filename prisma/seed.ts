@@ -14,19 +14,19 @@ async function main() {
 
   console.log("Criando produtos/serviços...");
   const crm = await prisma.product.create({
-    data: { name: "CRM Empresarial", defaultPrice: 159.9, type: "RECURRING", description: "Sistema de CRM completo" },
+    data: { name: "CRM Empresarial", defaultPrice: 159.9, implementationPrice: 800, type: "RECURRING", description: "Sistema de CRM completo com gestão de leads, funil de vendas e relatórios." },
   });
   const bot = await prisma.product.create({
-    data: { name: "Bot WhatsApp Inteligente", defaultPrice: 199.9, type: "RECURRING", description: "Atendimento automatizado" },
+    data: { name: "Bot WhatsApp Inteligente", defaultPrice: 199.9, implementationPrice: 1200, type: "RECURRING", description: "Atendimento automatizado no WhatsApp com fluxos personalizados e IA." },
   });
   const site = await prisma.product.create({
-    data: { name: "Site Institucional", defaultPrice: 149.9, type: "RECURRING", description: "Site + hospedagem" },
+    data: { name: "Site Institucional", defaultPrice: 149.9, implementationPrice: 1500, type: "RECURRING", description: "Site institucional responsivo + hospedagem e domínio." },
   });
   const agenda = await prisma.product.create({
-    data: { name: "Sistema de Agendamento", defaultPrice: 179.9, type: "RECURRING", description: "Agenda online" },
+    data: { name: "Sistema de Agendamento", defaultPrice: 179.9, implementationPrice: 600, type: "RECURRING", description: "Agenda online com confirmação automática e lembretes." },
   });
   const pdv = await prisma.product.create({
-    data: { name: "Sistema PDV", defaultPrice: 249.9, type: "RECURRING", description: "Ponto de venda" },
+    data: { name: "Sistema PDV", defaultPrice: 249.9, implementationPrice: 900, type: "RECURRING", description: "Ponto de venda completo com controle de estoque e caixa." },
   });
 
   console.log("Criando clientes...");

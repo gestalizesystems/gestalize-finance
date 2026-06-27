@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { PageHeader, InvoiceStatusBadge } from "@/components/ui";
+import { MonthFilter } from "@/components/MonthFilter";
+import { Pagination } from "@/components/Pagination";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 15;
 
 const typeLabel: Record<string, string> = {
   IMPLEMENTATION: "Implementação",
@@ -10,17 +14,51 @@ const typeLabel: Record<string, string> = {
   EXTRA: "Avulso",
 };
 
-export default async function ReceitasPage() {
-  const invoices = await prisma.invoice.findMany({
-    where: { status: "PAID" },
-    orderBy: { paidAt: "desc" },
-    take: 100,
-    include: { client: true },
-  });
+function monthRange(month?: string) {
+  if (!month) return null;
+  const [y, m] = month.split("-").map(Number);
+  if (!y || !m) return null;
+  return { gte: new Date(y, m - 1, 1), lt: new Date(y, m, 1) };
+}
+
+export default async function ReceitasPage({
+  searchParams,
+}: {
+  searchParams: { page?: string; month?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page) || 1);
+  const month = searchParams.month;
+  const range = monthRange(month);
+
+  const where = { status: "PAID" as const, ...(range ? { paidAt: range } : {}) };
+
+  const [total, invoices] = await Promise.all([
+    prisma.invoice.count({ where }),
+    prisma.invoice.findMany({
+      where,
+      orderBy: { paidAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: { client: true },
+    }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hrefForPage = (p: number) => {
+    const params = new URLSearchParams();
+    if (month) params.set("month", month);
+    params.set("page", String(p));
+    return `/receitas?${params.toString()}`;
+  };
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Receitas" subtitle="Entradas confirmadas: implementação, mensalidades e avulsos." />
+      <PageHeader
+        title="Receitas"
+        subtitle="Entradas confirmadas: implementação, mensalidades e avulsos."
+        action={<MonthFilter />}
+      />
+
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -42,8 +80,15 @@ export default async function ReceitasPage() {
                 <td className="py-3.5 text-right font-semibold text-positive">{formatCurrency(inv.amount)}</td>
               </tr>
             ))}
+            {invoices.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-slate-500">Nenhuma receita neste período.</td>
+              </tr>
+            )}
           </tbody>
         </table>
+
+        <Pagination page={page} totalPages={totalPages} totalItems={total} hrefForPage={hrefForPage} />
       </div>
     </div>
   );

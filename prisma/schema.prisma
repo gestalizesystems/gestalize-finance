@@ -87,12 +87,13 @@ model Client {
 }
 
 model Product {
-  id           String      @id @default(cuid())
-  name         String
-  description  String?
-  defaultPrice Decimal     @db.Decimal(10, 2)
-  type         ProductType @default(RECURRING)
-  active       Boolean     @default(true)
+  id                  String      @id @default(cuid())
+  name                String
+  description         String?
+  defaultPrice        Decimal     @db.Decimal(10, 2) // mensalidade / valor recorrente
+  implementationPrice Decimal?    @db.Decimal(10, 2) // taxa de implementação (única)
+  type                ProductType @default(RECURRING)
+  active              Boolean     @default(true)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 

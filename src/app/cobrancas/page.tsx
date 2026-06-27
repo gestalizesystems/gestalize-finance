@@ -4,22 +4,38 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { gatewayMode } from "@/lib/asaas";
 import { PageHeader, InvoiceStatusBadge } from "@/components/ui";
+import { Pagination } from "@/components/Pagination";
 import { createInvoice, markPaid, runBilling } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function CobrancasPage() {
-  const [invoices, clients] = await Promise.all([
+const PAGE_SIZE = 15;
+
+export default async function CobrancasPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page) || 1);
+
+  const [total, invoices, clients, openAgg] = await Promise.all([
+    prisma.invoice.count(),
     prisma.invoice.findMany({
       orderBy: { dueDate: "desc" },
       include: { client: true, product: true },
-      take: 100,
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
     prisma.client.findMany({ orderBy: { name: "asc" } }),
+    prisma.invoice.aggregate({
+      _sum: { amount: true },
+      where: { status: { in: ["PENDING", "OVERDUE"] } },
+    }),
   ]);
 
-  const open = invoices.filter((i) => i.status === "PENDING" || i.status === "OVERDUE");
-  const totalOpen = open.reduce((acc, i) => acc + toNumber(i.amount), 0);
+  const totalOpen = toNumber(openAgg._sum.amount);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hrefForPage = (p: number) => `/cobrancas?page=${p}`;
 
   return (
     <div className="space-y-6">
@@ -36,24 +52,24 @@ export default async function CobrancasPage() {
       />
 
       {/* Nova cobrança avulsa */}
-      <form action={createInvoice} className="card grid grid-cols-1 gap-3 md:grid-cols-6">
-        <select name="clientId" required className="input md:col-span-2">
-          <option value="">Selecione o cliente</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <input name="description" required placeholder="Descrição (ex: Implementação)" className="input md:col-span-2" />
-        <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
-        <input name="dueDate" type="date" required className="input" />
-        <select name="type" className="input md:col-span-2">
-          <option value="IMPLEMENTATION">Implementação</option>
-          <option value="EXTRA">Avulso / Upgrade</option>
-          <option value="SUBSCRIPTION">Mensalidade</option>
-        </select>
-        <button className="btn-primary md:col-span-4 md:justify-self-start">
-          + Gerar cobrança (com link de pagamento)
-        </button>
+      <form action={createInvoice} className="card space-y-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+          <select name="clientId" required className="input">
+            <option value="">Selecione o cliente</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <input name="description" required placeholder="Descrição (ex: Implementação)" className="input" />
+          <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
+          <input name="dueDate" type="date" required className="input" />
+          <select name="type" className="input">
+            <option value="IMPLEMENTATION">Implementação</option>
+            <option value="EXTRA">Avulso / Upgrade</option>
+            <option value="SUBSCRIPTION">Mensalidade</option>
+          </select>
+        </div>
+        <button className="btn-primary">+ Gerar cobrança (com link de pagamento)</button>
       </form>
 
       <div className="card overflow-x-auto">
@@ -102,6 +118,8 @@ export default async function CobrancasPage() {
             ))}
           </tbody>
         </table>
+
+        <Pagination page={page} totalPages={totalPages} totalItems={total} hrefForPage={hrefForPage} />
       </div>
     </div>
   );

@@ -24,7 +24,7 @@ export function StatCard({
   }[accent];
 
   return (
-    <div className="card flex flex-col gap-3">
+    <div className="card flex h-full flex-col gap-3">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-slate-400">{title}</p>

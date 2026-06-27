@@ -15,9 +15,9 @@ import {
   Workflow,
   MessageSquare,
   Settings,
-  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/Logo";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -40,15 +40,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-ink-700/60 bg-ink-900 px-4 py-5">
       {/* Logo */}
-      <div className="mb-7 flex items-center gap-2.5 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/15 text-brand-400">
-          <Bot className="h-6 w-6" />
-        </div>
-        <div className="leading-tight">
-          <p className="text-lg font-bold text-white">Gestalize</p>
-          <p className="-mt-1 text-sm font-semibold text-brand-400">Finance</p>
-        </div>
-      </div>
+      <Logo className="mb-7 px-2" />
 
       {/* Navegação */}
       <nav className="flex-1 space-y-1 overflow-y-auto pr-1">

@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
+import { Pagination } from "@/components/Pagination";
 import { createSubscription } from "../actions";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 15;
 
 const subStatus: Record<string, string> = {
   ACTIVE: "badge-paid",
@@ -11,15 +14,27 @@ const subStatus: Record<string, string> = {
   CANCELED: "badge-overdue",
 };
 
-export default async function AssinaturasPage() {
-  const [subs, clients, products] = await Promise.all([
+export default async function AssinaturasPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page) || 1);
+
+  const [total, subs, clients, products] = await Promise.all([
+    prisma.subscription.count(),
     prisma.subscription.findMany({
       orderBy: { createdAt: "desc" },
       include: { client: true, product: true },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
     prisma.client.findMany({ orderBy: { name: "asc" } }),
     prisma.product.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
   ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hrefForPage = (p: number) => `/assinaturas?page=${p}`;
 
   return (
     <div className="space-y-6">
@@ -28,22 +43,24 @@ export default async function AssinaturasPage() {
         subtitle="Planos recorrentes — geram cobrança automática todo ciclo."
       />
 
-      <form action={createSubscription} className="card grid grid-cols-1 gap-3 md:grid-cols-6">
-        <select name="clientId" required className="input md:col-span-2">
-          <option value="">Cliente</option>
-          {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <select name="productId" required className="input md:col-span-2">
-          <option value="">Produto / Serviço</option>
-          {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-        <input name="amount" type="number" step="0.01" placeholder="Valor (opcional)" className="input" />
-        <select name="cycle" className="input">
-          <option value="MONTHLY">Mensal</option>
-          <option value="YEARLY">Anual</option>
-        </select>
-        <input name="dueDay" type="number" min={1} max={28} defaultValue={5} placeholder="Dia venc." className="input" />
-        <button className="btn-primary md:col-span-5 md:justify-self-start">+ Criar assinatura</button>
+      <form action={createSubscription} className="card space-y-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+          <select name="clientId" required className="input">
+            <option value="">Cliente</option>
+            {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <select name="productId" required className="input">
+            <option value="">Produto / Serviço</option>
+            {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <input name="amount" type="number" step="0.01" placeholder="Valor (opcional)" className="input" />
+          <select name="cycle" className="input">
+            <option value="MONTHLY">Mensal</option>
+            <option value="YEARLY">Anual</option>
+          </select>
+          <input name="dueDay" type="number" min={1} max={28} defaultValue={5} placeholder="Dia venc." className="input" />
+        </div>
+        <button className="btn-primary">+ Criar assinatura</button>
       </form>
 
       <div className="card overflow-x-auto">
@@ -73,8 +90,15 @@ export default async function AssinaturasPage() {
                 </td>
               </tr>
             ))}
+            {subs.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-slate-500">Nenhuma assinatura cadastrada.</td>
+              </tr>
+            )}
           </tbody>
         </table>
+
+        <Pagination page={page} totalPages={totalPages} totalItems={total} hrefForPage={hrefForPage} />
       </div>
     </div>
   );

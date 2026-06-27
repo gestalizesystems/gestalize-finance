@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
+import { Pagination } from "@/components/Pagination";
 import { createCost } from "../actions";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 15;
 
 const categoryLabel: Record<string, string> = {
   PER_CLIENT: "Por cliente",
@@ -15,44 +18,61 @@ const categoryLabel: Record<string, string> = {
   OTHER: "Outro",
 };
 
-export default async function DespesasPage() {
-  const [costs, clients] = await Promise.all([
-    prisma.cost.findMany({ orderBy: { date: "desc" }, include: { client: true } }),
+export default async function DespesasPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = Math.max(1, Number(searchParams.page) || 1);
+
+  const [total, costs, clients, totalAgg] = await Promise.all([
+    prisma.cost.count(),
+    prisma.cost.findMany({
+      orderBy: { date: "desc" },
+      include: { client: true },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
     prisma.client.findMany({ orderBy: { name: "asc" } }),
+    prisma.cost.aggregate({ _sum: { amount: true } }),
   ]);
 
-  const total = costs.reduce((acc, c) => acc + toNumber(c.amount), 0);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalAmount = toNumber(totalAgg._sum.amount);
+  const hrefForPage = (p: number) => `/despesas?page=${p}`;
 
   return (
     <div className="space-y-6">
       <PageHeader title="Despesas" subtitle="Custos por sistema, ferramentas, servidores e fixos." />
 
-      <form action={createCost} className="card grid grid-cols-1 gap-3 md:grid-cols-6">
-        <input name="description" required placeholder="Descrição do custo" className="input md:col-span-2" />
-        <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
-        <select name="category" className="input">
-          {Object.entries(categoryLabel).map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
-          ))}
-        </select>
-        <select name="clientId" className="input">
-          <option value="">Sem cliente</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-        <label className="flex items-center gap-2 text-sm text-slate-300">
-          <input type="checkbox" name="recurring" className="h-4 w-4 rounded border-ink-700 bg-ink-900" />
-          Recorrente
-        </label>
-        <button className="btn-primary md:col-span-6 md:justify-self-start">+ Adicionar despesa</button>
+      <form action={createCost} className="card space-y-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+          <input name="description" required placeholder="Descrição do custo" className="input" />
+          <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
+          <select name="category" className="input">
+            {Object.entries(categoryLabel).map(([v, l]) => (
+              <option key={v} value={v}>{l}</option>
+            ))}
+          </select>
+          <select name="clientId" className="input">
+            <option value="">Sem cliente</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <label className="flex items-center gap-2 px-1 text-sm text-slate-300">
+            <input type="checkbox" name="recurring" className="h-4 w-4 rounded border-ink-700 bg-ink-900" />
+            Recorrente
+          </label>
+        </div>
+        <button className="btn-primary">+ Adicionar despesa</button>
       </form>
 
       <div className="card overflow-x-auto">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-semibold text-white">Histórico</h3>
           <span className="text-sm text-slate-400">
-            Total: <span className="font-semibold text-negative">{formatCurrency(total)}</span>
+            Total geral: <span className="font-semibold text-negative">{formatCurrency(totalAmount)}</span>
           </span>
         </div>
         <table className="w-full text-sm">
@@ -78,8 +98,15 @@ export default async function DespesasPage() {
                 <td className="py-3.5 text-right font-semibold text-negative">{formatCurrency(c.amount)}</td>
               </tr>
             ))}
+            {costs.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-slate-500">Nenhuma despesa registrada.</td>
+              </tr>
+            )}
           </tbody>
         </table>
+
+        <Pagination page={page} totalPages={totalPages} totalItems={total} hrefForPage={hrefForPage} />
       </div>
     </div>
   );

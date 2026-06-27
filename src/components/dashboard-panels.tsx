@@ -18,9 +18,9 @@ const flowSteps = [
 
 export function BillingFlow() {
   return (
-    <div className="card">
+    <div className="card flex h-full flex-col">
       <h3 className="mb-5 font-semibold text-white">Fluxo de Cobrança</h3>
-      <div className="flex items-start justify-between gap-1">
+      <div className="flex flex-1 items-center justify-between gap-1">
         {flowSteps.map((s, i) => {
           const Icon = s.icon;
           return (

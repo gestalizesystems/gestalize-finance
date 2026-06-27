@@ -26,14 +26,42 @@ export async function createClient(formData: FormData) {
 }
 
 export async function createProduct(formData: FormData) {
+  const impl = formData.get("implementationPrice");
   await prisma.product.create({
     data: {
       name: String(formData.get("name") || "").trim(),
       description: (formData.get("description") as string) || null,
       defaultPrice: toNumber(formData.get("defaultPrice")),
+      implementationPrice: impl ? toNumber(impl) : null,
       type: (formData.get("type") as ProductType) || "RECURRING",
     },
   });
+  revalidatePath("/produtos");
+}
+
+export async function toggleProductActive(formData: FormData) {
+  const id = String(formData.get("productId"));
+  const product = await prisma.product.findUnique({ where: { id } });
+  if (!product) return;
+  await prisma.product.update({
+    where: { id },
+    data: { active: !product.active },
+  });
+  revalidatePath("/produtos");
+}
+
+export async function deleteProduct(formData: FormData) {
+  const id = String(formData.get("productId"));
+  // Só exclui de fato se não houver assinaturas vinculadas; caso contrário,
+  // inativa (preserva o histórico de cobranças).
+  const subs = await prisma.subscription.count({ where: { productId: id } });
+  if (subs > 0) {
+    await prisma.product.update({ where: { id }, data: { active: false } });
+  } else {
+    await prisma.invoice.updateMany({ where: { productId: id }, data: { productId: null } });
+    await prisma.cost.updateMany({ where: { productId: id }, data: { productId: null } });
+    await prisma.product.delete({ where: { id } });
+  }
   revalidatePath("/produtos");
 }
 

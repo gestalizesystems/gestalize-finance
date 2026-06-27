@@ -8,6 +8,7 @@
 import { addMonths, addYears, setDate } from "date-fns";
 import { prisma } from "./prisma";
 import { createCharge } from "./asaas";
+import { sendEmail, renderInvoiceEmail } from "./email";
 import { toNumber } from "./utils";
 import type { BillingCycle } from "@prisma/client";
 
@@ -71,6 +72,7 @@ export async function generateDueInvoices(horizonDays = 0) {
     });
 
     // Gera link de pagamento no gateway (mock por enquanto).
+    let paymentLink: string | null = null;
     try {
       const charge = await createCharge({
         customerName: sub.client.name,
@@ -81,12 +83,29 @@ export async function generateDueInvoices(horizonDays = 0) {
         dueDate,
         externalReference: invoice.id,
       });
+      paymentLink = charge.paymentLink;
       await prisma.invoice.update({
         where: { id: invoice.id },
         data: { externalId: charge.externalId, paymentLink: charge.paymentLink },
       });
     } catch (err) {
       console.error("Falha ao gerar cobrança no gateway:", err);
+    }
+
+    // Envia e-mail de cobrança (se o cliente tiver e-mail e o Resend estiver ligado).
+    if (sub.client.email) {
+      try {
+        const { subject, html } = renderInvoiceEmail({
+          clientName: sub.client.name,
+          description: `Mensalidade ${sub.product.name}`,
+          amount: sub.amount,
+          dueDate,
+          paymentLink,
+        });
+        await sendEmail({ to: sub.client.email, subject, html });
+      } catch (err) {
+        console.error("Falha ao enviar e-mail de cobrança:", err);
+      }
     }
 
     await prisma.subscription.update({

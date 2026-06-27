@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { ExternalLink, Play } from "lucide-react";
+import { ExternalLink, Play, Mail } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { gatewayMode } from "@/lib/asaas";
 import { PageHeader, InvoiceStatusBadge } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
-import { createInvoice, markPaid, runBilling } from "../actions";
+import { createInvoice, markPaid, runBilling, sendInvoiceEmail } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -103,16 +103,29 @@ export default async function CobrancasPage({
                   )}
                 </td>
                 <td className="py-3.5">
-                  {inv.status !== "PAID" && inv.status !== "CANCELED" ? (
-                    <form action={markPaid}>
-                      <input type="hidden" name="invoiceId" value={inv.id} />
-                      <button className="rounded-lg bg-positive/15 px-2.5 py-1 text-xs font-semibold text-positive hover:bg-positive/25">
-                        Dar baixa
-                      </button>
-                    </form>
-                  ) : (
-                    <span className="text-xs text-slate-500">{inv.paidAt ? formatDate(inv.paidAt) : "Pago"}</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {inv.client.email && inv.status !== "PAID" && inv.status !== "CANCELED" && (
+                      <form action={sendInvoiceEmail}>
+                        <input type="hidden" name="invoiceId" value={inv.id} />
+                        <button
+                          title={`Enviar cobrança por e-mail para ${inv.client.email}`}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand/15 text-brand-400 hover:bg-brand/25"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </button>
+                      </form>
+                    )}
+                    {inv.status !== "PAID" && inv.status !== "CANCELED" ? (
+                      <form action={markPaid}>
+                        <input type="hidden" name="invoiceId" value={inv.id} />
+                        <button className="rounded-lg bg-positive/15 px-2.5 py-1 text-xs font-semibold text-positive hover:bg-positive/25">
+                          Dar baixa
+                        </button>
+                      </form>
+                    ) : (
+                      <span className="text-xs text-slate-500">{inv.paidAt ? formatDate(inv.paidAt) : "Pago"}</span>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

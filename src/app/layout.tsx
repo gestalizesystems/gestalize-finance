@@ -2,10 +2,25 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3010";
+// Normaliza a URL do site: aceita valor sem esquema (ex: "exemplo.com.br")
+// e nunca quebra o build se vier inválida.
+function resolveSiteUrl(): URL {
+  const fallback = "http://localhost:3010";
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
+  const candidate = raw
+    ? /^https?:\/\//i.test(raw)
+      ? raw
+      : `https://${raw}`
+    : fallback;
+  try {
+    return new URL(candidate);
+  } catch {
+    return new URL(fallback);
+  }
+}
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: resolveSiteUrl(),
   title: {
     default: "Gestalize Finance",
     template: "%s · Gestalize Finance",

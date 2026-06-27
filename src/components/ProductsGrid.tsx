@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Trash2, Power, PencilLine } from "lucide-react";
+import { X, Trash2, Power } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { deleteProduct, toggleProductActive } from "@/app/actions";
 

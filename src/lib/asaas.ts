@@ -29,7 +29,7 @@ function isLive() {
 }
 
 // --------- MOCK ---------
-function mockCharge(input: CreateChargeInput): ChargeResult {
+function mockCharge(): ChargeResult {
   const id = "mock_" + Math.random().toString(36).slice(2, 11);
   return {
     externalId: id,
@@ -70,7 +70,7 @@ async function ensureCustomer(input: CreateChargeInput): Promise<string> {
 export async function createCharge(
   input: CreateChargeInput,
 ): Promise<ChargeResult> {
-  if (!isLive()) return mockCharge(input);
+  if (!isLive()) return mockCharge();
 
   const customerId = await ensureCustomer(input);
   const charge = await asaasFetch("/payments", {

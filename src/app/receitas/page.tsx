@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { PageHeader, InvoiceStatusBadge } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
 import { MonthFilter } from "@/components/MonthFilter";
 import { Pagination } from "@/components/Pagination";
 

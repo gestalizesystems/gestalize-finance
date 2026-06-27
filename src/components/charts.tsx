@@ -47,7 +47,7 @@ export function RevenueExpenseChart({ data }: { data: MonthDatum[] }) {
         <Tooltip
           contentStyle={tooltipStyle}
           cursor={{ fill: "#13203855" }}
-          formatter={(v: number) => formatCurrency(v)}
+          formatter={(value) => formatCurrency(value)}
         />
         <Bar dataKey="receita" name="Receitas" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={26} />
         <Bar dataKey="despesa" name="Despesas" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={26} />
@@ -117,7 +117,7 @@ export function MrrTrendChart({ data }: { data: MonthDatum[] }) {
           tickFormatter={(v) => (v >= 1000 ? `${v / 1000}k` : `${v}`)}
           width={34}
         />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => formatCurrency(v)} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(value) => formatCurrency(value)} />
         <Line
           type="monotone"
           dataKey="receita"

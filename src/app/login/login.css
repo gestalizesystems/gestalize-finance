@@ -1,0 +1,113 @@
+/* Tela de login — portada do projeto Lecoland, rebrandizada p/ Gestalize Finance.
+   Tema claro, isolado do tema dark do app. */
+
+.auth {
+  --azul: #2563eb;
+  --azul-vivo: #2f6bf6;
+  --azul-escuro: #1d4ed8;
+  --azul-medio: #3b82f6;
+  --azul-claro: #eaf1fe;
+  --texto: #1e293b;
+  --escuro: #0f172a;
+  --suave: #64748b;
+  --borda: #e6ebf4;
+
+  font-family: "Poppins", -apple-system, system-ui, sans-serif;
+  color: var(--texto);
+  background: #f4f7fc;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+.auth * { box-sizing: border-box; }
+
+/* ===== Decorações de fundo ===== */
+.auth .deco { position: fixed; pointer-events: none; z-index: 0; }
+.auth .deco-canvas { top: 0; left: 0; width: 100%; height: 100%; }
+.auth .deco-blob1 { top: -120px; left: -120px; width: 420px; height: 420px; border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(79,140,246,.10), transparent 70%); }
+.auth .deco-blob2 { top: -70px; right: 40px; width: 540px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle at 58% 42%, rgba(202,210,228,.6), transparent 62%); }
+.auth .deco-blob3 { bottom: -60px; left: -40px; width: 520px; height: 380px; border-radius: 50%;
+  background: radial-gradient(circle at 42% 60%, rgba(206,214,232,.5), transparent 62%); }
+.auth .deco-veil { top: 6%; left: 0; width: 52%; height: 84%;
+  background: radial-gradient(ellipse 62% 56% at 42% 50%, rgba(244,247,252,.8), rgba(244,247,252,0) 72%); }
+.auth .deco-wave { top: 0; left: 0; width: 100%; height: 100%; opacity: .95; }
+
+/* ===== Layout ===== */
+.auth .wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; min-height: 100vh;
+  display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 70px; padding: 40px 48px 90px; }
+
+/* ===== Esquerda — marca ===== */
+.auth .marca { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+.auth .robo { width: 84px; height: 84px; object-fit: contain; flex: 0 0 auto; }
+.auth .wordmark { line-height: 1.0; }
+.auth .wordmark .g { font-size: 42px; font-weight: 800; color: var(--escuro); letter-spacing: -1px; display: block; }
+.auth .wordmark .b { font-size: 42px; font-weight: 800; color: var(--azul); letter-spacing: -1px; display: block; }
+.auth .esq h2 { font-size: 34px; line-height: 1.2; margin: 0 0 16px; color: var(--escuro); font-weight: 700; }
+.auth .esq h2 b { color: var(--azul); font-weight: 700; }
+.auth .esq .desc { color: var(--suave); font-size: 16px; margin: 0 0 34px; line-height: 1.55; max-width: 420px; }
+.auth .features { list-style: none; padding: 0; margin: 0 0 40px; display: flex; flex-direction: column; gap: 18px; }
+.auth .features li { display: flex; align-items: center; gap: 14px; font-weight: 600; color: #334155; font-size: 15.5px; }
+.auth .fic { width: 42px; height: 42px; border-radius: 12px; background: var(--azul-claro); color: var(--azul);
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.auth .seg { position: fixed; left: 56px; bottom: 32px; z-index: 2; display: flex; align-items: center; gap: 12px; }
+.auth .seg .sic { width: 40px; height: 40px; color: var(--azul);
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.auth .seg strong { color: var(--escuro); font-size: 14.5px; display: block; font-weight: 600; }
+.auth .seg small { font-size: 13px; color: var(--suave); }
+
+/* ===== Direita — card ===== */
+.auth .auth-card { background: #fff; border-radius: 26px; padding: 44px 40px;
+  box-shadow: 0 24px 70px rgba(37,99,235,.13), 0 6px 22px rgba(15,23,42,.05); border: 1px solid #eef2f9; }
+.auth .col-dir { display: flex; flex-direction: column; }
+.auth .escudo { width: 64px; height: 64px; border-radius: 50%; background: var(--azul-claro); color: var(--azul);
+  margin: 0 auto 18px; display: flex; align-items: center; justify-content: center; }
+.auth .auth-card h2 { text-align: center; margin: 0 0 6px; font-size: 26px; color: var(--escuro); font-weight: 700; }
+.auth .auth-card .sub { text-align: center; color: var(--suave); margin: 0 0 30px; font-size: 14.5px; }
+.auth label { display: block; font-weight: 600; font-size: 14px; margin: 0 0 9px; color: #334155; }
+.auth .campo { display: flex; align-items: center; gap: 11px; border: 1.5px solid var(--borda); border-radius: 13px;
+  padding: 0 16px; margin-bottom: 20px; transition: border .15s, box-shadow .15s; background: #fff; }
+.auth .campo:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(37,99,235,.14); }
+.auth .campo .ic { color: var(--azul); display: flex; flex: 0 0 auto; }
+.auth .campo input { flex: 1; border: none; outline: none; background: transparent; padding: 15px 0; font-size: 15px;
+  font-family: inherit; color: var(--texto); }
+.auth .campo input::placeholder { color: #94a3b8; }
+.auth .olho { background: none; border: none; cursor: pointer; color: #94a3b8; padding: 4px; display: flex; }
+.auth .linha { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; font-size: 14px; }
+.auth .chk { display: flex; align-items: center; gap: 9px; font-weight: 500; color: #475569; margin: 0; cursor: pointer; }
+.auth .chk input { accent-color: var(--azul); width: 17px; height: 17px; border-radius: 5px; }
+.auth .linha a { color: var(--azul); font-weight: 600; text-decoration: none; cursor: pointer; }
+.auth .btn-entrar { position: relative; width: 100%; background: var(--azul-vivo); color: #fff; border: none; border-radius: 13px;
+  padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: background .15s; font-family: inherit; }
+.auth .btn-entrar:hover { background: var(--azul-escuro); }
+.auth .btn-entrar:disabled { opacity: .7; cursor: default; }
+.auth .btn-entrar .seta { position: absolute; right: 22px; display: flex; }
+.auth .aviso { text-align: center; color: var(--suave); font-size: 13px; margin-top: 18px; line-height: 1.55; }
+.auth .erro { color: #dc2626; font-size: 13px; text-align: center; margin-top: 14px; min-height: 16px; font-weight: 600; }
+.auth .rodape { text-align: center; color: var(--suave); font-size: 13px; margin-top: 22px;
+  display: flex; align-items: center; justify-content: center; gap: 7px; }
+
+.auth .marca-mob { display: none; }
+
+@media (max-width: 900px) {
+  .auth { background: #fff; }
+  .auth .deco { display: none; }
+  .auth .esq { display: none; }
+  .auth .wrap { grid-template-columns: 1fr; max-width: 440px; padding: 26px 22px 40px; align-items: start; }
+  .auth .marca-mob { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .auth .marca-mob img { width: 78px; height: 78px; object-fit: contain; }
+  .auth .marca-mob .wm { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+  .auth .marca-mob .wm .g { color: var(--escuro); }
+  .auth .marca-mob .wm .b { color: var(--azul); }
+  .auth .auth-card { box-shadow: none; border: none; background: transparent; padding: 0; }
+  .auth .escudo { display: none; }
+  .auth .auth-card h2 { font-size: 25px; }
+  .auth .auth-card .sub { margin-bottom: 26px; }
+  .auth .rodape { margin-top: 28px; }
+}
+@media (max-width: 380px) {
+  .auth .marca-mob img { width: 66px; height: 66px; }
+  .auth .marca-mob .wm { font-size: 26px; }
+}

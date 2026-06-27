@@ -15,6 +15,7 @@ import {
   Workflow,
   MessageSquare,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
@@ -68,10 +69,17 @@ export function Sidebar() {
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand font-bold text-white">
           G
         </div>
-        <div className="leading-tight">
-          <p className="text-sm font-semibold text-white">Gestalize Systems</p>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="truncate text-sm font-semibold text-white">Gestalize Systems</p>
           <p className="text-xs text-slate-400">Administrador</p>
         </div>
+        <a
+          href="/api/logout"
+          title="Sair"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-ink-800 hover:text-negative"
+        >
+          <LogOut className="h-[18px] w-[18px]" />
+        </a>
       </div>
     </aside>
   );

@@ -11,7 +11,7 @@ import {
   advanceDueDate,
   withDueDay,
 } from "@/lib/billing";
-import type { BillingCycle, CostCategory, ProductType } from "@prisma/client";
+import type { BillingCycle, CostCategory, ProductType, InvoiceType } from "@prisma/client";
 
 export async function createClient(formData: FormData) {
   await prisma.client.create({
@@ -118,7 +118,7 @@ export async function createInvoice(formData: FormData) {
       clientId,
       productId: (formData.get("productId") as string) || null,
       description,
-      type: (formData.get("type") as any) || "EXTRA",
+      type: (formData.get("type") as InvoiceType) || "EXTRA",
       amount,
       dueDate,
       status: "PENDING",
@@ -155,9 +155,8 @@ export async function markPaid(formData: FormData) {
 
 // Executa o motor de cobrança manualmente (também roda no cron).
 export async function runBilling() {
-  const created = await generateDueInvoices(3); // gera com 3 dias de antecedência
-  const overdue = await markOverdueInvoices();
+  await generateDueInvoices(3); // gera com 3 dias de antecedência
+  await markOverdueInvoices();
   revalidatePath("/cobrancas");
   revalidatePath("/");
-  return { created: created.length, overdue };
 }

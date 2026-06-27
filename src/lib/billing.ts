@@ -9,6 +9,7 @@ import { addMonths, addYears, setDate } from "date-fns";
 import { prisma } from "./prisma";
 import { createCharge } from "./asaas";
 import { sendEmail, renderInvoiceEmail } from "./email";
+import { sendWhatsApp, renderInvoiceWhatsApp } from "./whatsapp";
 import { toNumber } from "./utils";
 import type { BillingCycle } from "@prisma/client";
 
@@ -105,6 +106,22 @@ export async function generateDueInvoices(horizonDays = 0) {
         await sendEmail({ to: sub.client.email, subject, html });
       } catch (err) {
         console.error("Falha ao enviar e-mail de cobrança:", err);
+      }
+    }
+
+    // Envia WhatsApp de cobrança (se o cliente tiver telefone e o Z-API estiver ligado).
+    if (sub.client.phone) {
+      try {
+        const message = renderInvoiceWhatsApp({
+          clientName: sub.client.name,
+          description: `Mensalidade ${sub.product.name}`,
+          amount: sub.amount,
+          dueDate,
+          paymentLink,
+        });
+        await sendWhatsApp({ phone: sub.client.phone, message });
+      } catch (err) {
+        console.error("Falha ao enviar WhatsApp de cobrança:", err);
       }
     }
 

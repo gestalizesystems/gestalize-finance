@@ -1,11 +1,17 @@
 import Link from "next/link";
-import { ExternalLink, Play, Mail } from "lucide-react";
+import { ExternalLink, Play, Mail, MessageCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { gatewayMode } from "@/lib/asaas";
 import { PageHeader, InvoiceStatusBadge } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
-import { createInvoice, markPaid, runBilling, sendInvoiceEmail } from "../actions";
+import {
+  createInvoice,
+  markPaid,
+  runBilling,
+  sendInvoiceEmail,
+  sendInvoiceWhatsApp,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -104,6 +110,17 @@ export default async function CobrancasPage({
                 </td>
                 <td className="py-3.5">
                   <div className="flex items-center gap-2">
+                    {inv.client.phone && inv.status !== "PAID" && inv.status !== "CANCELED" && (
+                      <form action={sendInvoiceWhatsApp}>
+                        <input type="hidden" name="invoiceId" value={inv.id} />
+                        <button
+                          title={`Enviar cobrança por WhatsApp para ${inv.client.phone}`}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg bg-positive/15 text-positive hover:bg-positive/25"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </button>
+                      </form>
+                    )}
                     {inv.client.email && inv.status !== "PAID" && inv.status !== "CANCELED" && (
                       <form action={sendInvoiceEmail}>
                         <input type="hidden" name="invoiceId" value={inv.id} />

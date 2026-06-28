@@ -115,7 +115,11 @@ export async function createInvoice(formData: FormData) {
   const client = await prisma.client.findUnique({ where: { id: clientId } });
   if (!client) return;
 
-  const dueDate = new Date(String(formData.get("dueDate")));
+  // Vencimento não pode ser no passado (o Asaas recusa) — ajusta p/ hoje.
+  const dueStr = String(formData.get("dueDate") || "");
+  const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD local
+  const effectiveDueStr = !dueStr || dueStr < todayStr ? todayStr : dueStr;
+  const dueDate = new Date(`${effectiveDueStr}T12:00:00`);
   const description = String(formData.get("description") || "Cobrança");
   const type = String(formData.get("type") || "EXTRA");
   const productId = (formData.get("productId") as string) || null;

@@ -8,6 +8,7 @@ type ClientOpt = { id: string; name: string };
 export function NewInvoiceForm({ clients }: { clients: ClientOpt[] }) {
   const [type, setType] = useState("IMPLEMENTATION");
   const combo = type === "COMBO";
+  const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD local
 
   return (
     <form action={createInvoice} className="card space-y-3">
@@ -30,7 +31,7 @@ export function NewInvoiceForm({ clients }: { clients: ClientOpt[] }) {
           <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
         )}
 
-        <input name="dueDate" type="date" required className="input" />
+        <input name="dueDate" type="date" required min={today} defaultValue={today} className="input" />
 
         <select
           name="type"

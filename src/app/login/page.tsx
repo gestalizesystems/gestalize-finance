@@ -10,6 +10,8 @@ export default function LoginPage() {
   const [erro, setErro] = useState("");
   const [erroAzul, setErroAzul] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [totp, setTotp] = useState("");
+  const [showTotp, setShowTotp] = useState(false);
 
   // Animações de fundo (pontinhos que fogem do cursor + ondas).
   useEffect(() => {
@@ -125,11 +127,17 @@ export default function LoginPage() {
       const r = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), senha }),
+        body: JSON.stringify({ email: email.trim(), senha, totp: totp.trim() }),
       });
       const j = await r.json();
       if (j.ok) { window.location.href = "/"; return; }
-      setErro(j.erro || "Não foi possível entrar.");
+      if (j.needsTotp) {
+        setShowTotp(true);
+        setErroAzul(true);
+        setErro(showTotp ? "Código inválido. Tente de novo." : "Digite o código do seu app autenticador.");
+      } else {
+        setErro(j.erro || "Não foi possível entrar.");
+      }
     } catch {
       setErro("Erro de conexão. Tente novamente.");
     }
@@ -222,6 +230,25 @@ export default function LoginPage() {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                 </button>
               </div>
+
+              {showTotp && (
+                <>
+                  <label>Código de verificação</label>
+                  <div className="campo">
+                    <span className="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg></span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      value={totp}
+                      onChange={(e) => setTotp(e.target.value.replace(/\D/g, ""))}
+                      placeholder="000000"
+                      autoFocus
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="linha">
                 <label className="chk"><input type="checkbox" defaultChecked /> Lembrar de mim</label>

@@ -46,12 +46,16 @@ export default async function RelatorioDocumentoPage({
       <div className="mx-auto max-w-3xl bg-white p-10 shadow-sm print:max-w-none print:p-0 print:shadow-none">
         {/* Cabeçalho */}
         <div className="mb-6 flex items-start justify-between border-b border-slate-300 pb-5">
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-900">{cfg[SETTING_KEYS.companyName]}</h1>
-            <p className="mt-0.5 text-sm text-slate-500">
-              {cfg[SETTING_KEYS.companyCnpj] && <>CNPJ: {displayDocument(cfg[SETTING_KEYS.companyCnpj])} · </>}
-              {cfg[SETTING_KEYS.companyEmail]}
-            </p>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/gestalize-bot.png" alt="" className="h-12 w-auto shrink-0" />
+            <div>
+              <h1 className="text-2xl font-extrabold text-slate-900">{cfg[SETTING_KEYS.companyName]}</h1>
+              <p className="mt-0.5 text-sm text-slate-500">
+                {cfg[SETTING_KEYS.companyCnpj] && <>CNPJ: {displayDocument(cfg[SETTING_KEYS.companyCnpj])} · </>}
+                {cfg[SETTING_KEYS.companyEmail]}
+              </p>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold text-slate-900">Relatório Financeiro</p>

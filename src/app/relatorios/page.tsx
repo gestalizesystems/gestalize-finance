@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   DollarSign,
   RefreshCw,
@@ -5,12 +6,13 @@ import {
   Wallet,
   AlertTriangle,
   Ticket,
+  FileText,
 } from "lucide-react";
 import { getReportData, defaultReportRange } from "@/lib/metrics";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { StatCard, PageHeader } from "@/components/ui";
 import { ProfitChart, RevenueTypeDonut } from "@/components/charts";
-import { DateRangeFilter, PrintButton } from "@/components/ReportControls";
+import { DateRangeFilter } from "@/components/ReportControls";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +46,13 @@ export default async function RelatoriosPage({
           action={
             <div className="flex flex-wrap items-end gap-3">
               <DateRangeFilter start={toInputDate(start)} end={toInputDate(end)} />
-              <PrintButton />
+              <Link
+                href={`/relatorios/documento?start=${toInputDate(start)}&end=${toInputDate(end)}`}
+                target="_blank"
+                className="btn-primary"
+              >
+                <FileText className="h-4 w-4" /> Gerar PDF
+              </Link>
             </div>
           }
         />

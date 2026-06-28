@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 
-// Esconde a sidebar em telas "cheias" (ex: login).
-const FULLSCREEN_ROUTES = ["/login"];
+// Esconde a sidebar em telas "cheias" (ex: login, documento de impressão).
+const FULLSCREEN_ROUTES = ["/login", "/relatorios/documento"];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

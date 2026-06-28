@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createCharge } from "@/lib/asaas";
 import { sendEmail, renderInvoiceEmail } from "@/lib/email";
 import { sendWhatsApp, renderInvoiceWhatsApp } from "@/lib/whatsapp";
+import { setSettings, SETTING_KEYS } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
 import {
   generateDueInvoices,
@@ -158,7 +159,7 @@ export async function sendInvoiceEmail(formData: FormData) {
   });
   if (!invoice || !invoice.client.email) return;
 
-  const { subject, html } = renderInvoiceEmail({
+  const { subject, html } = await renderInvoiceEmail({
     clientName: invoice.client.name,
     description: invoice.description,
     amount: invoice.amount,
@@ -178,7 +179,7 @@ export async function sendInvoiceWhatsApp(formData: FormData) {
   });
   if (!invoice || !invoice.client.phone) return;
 
-  const message = renderInvoiceWhatsApp({
+  const message = await renderInvoiceWhatsApp({
     clientName: invoice.client.name,
     description: invoice.description,
     amount: invoice.amount,
@@ -209,6 +210,30 @@ export async function deleteCost(formData: FormData) {
   const id = String(formData.get("costId"));
   await prisma.cost.delete({ where: { id } });
   revalidatePath("/despesas");
+}
+
+// Salva os templates de mensagem (WhatsApp + e-mail).
+export async function saveMessageTemplates(formData: FormData) {
+  await setSettings({
+    [SETTING_KEYS.waTemplate]: String(formData.get("waTemplate") ?? ""),
+    [SETTING_KEYS.emailSubject]: String(formData.get("emailSubject") ?? ""),
+    [SETTING_KEYS.emailBody]: String(formData.get("emailBody") ?? ""),
+  });
+  revalidatePath("/mensagens");
+}
+
+// Salva os dados da empresa (Configurações).
+export async function saveCompanySettings(formData: FormData) {
+  await setSettings({
+    [SETTING_KEYS.companyName]: String(formData.get("companyName") ?? ""),
+    [SETTING_KEYS.companyCnpj]: String(formData.get("companyCnpj") ?? ""),
+    [SETTING_KEYS.companyEmail]: String(formData.get("companyEmail") ?? ""),
+    [SETTING_KEYS.companyPhone]: String(formData.get("companyPhone") ?? ""),
+    [SETTING_KEYS.companyPix]: String(formData.get("companyPix") ?? ""),
+    [SETTING_KEYS.companyAddress]: String(formData.get("companyAddress") ?? ""),
+  });
+  revalidatePath("/configuracoes");
+  revalidatePath("/relatorios");
 }
 
 // Executa o motor de cobrança manualmente (também roda no cron).

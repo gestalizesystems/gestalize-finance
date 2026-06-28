@@ -28,14 +28,6 @@ export function formatDate(date: Date | string): string {
   }).format(d);
 }
 
-export function formatMonthYear(date: Date): string {
-  const s = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
-    year: "numeric",
-  }).format(date);
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
 // Retorna sinal e % de variação entre dois valores.
 export function variation(current: number, previous: number) {
   if (previous === 0) return { pct: current > 0 ? 100 : 0, up: current >= 0 };

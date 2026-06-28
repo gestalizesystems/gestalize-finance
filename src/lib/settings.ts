@@ -76,10 +76,6 @@ export async function setSettings(entries: Record<string, string>) {
   }
 }
 
-export async function getCompanyName(): Promise<string> {
-  return getSetting(SETTING_KEYS.companyName);
-}
-
 // Substitui as variáveis {x} de um template.
 export function applyTemplate(template: string, vars: Record<string, string>) {
   return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");

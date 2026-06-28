@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Printer } from "lucide-react";
 
 export function DateRangeFilter({ start, end }: { start: string; end: string }) {
   const router = useRouter();
@@ -30,14 +29,5 @@ export function DateRangeFilter({ start, end }: { start: string; end: string }) 
       </div>
       <button onClick={apply} className="btn-ghost">Aplicar</button>
     </div>
-  );
-}
-
-export function PrintButton() {
-  return (
-    <button onClick={() => window.print()} className="btn-primary" title="Imprimir relatório">
-      <Printer className="h-4 w-4" />
-      Imprimir
-    </button>
   );
 }

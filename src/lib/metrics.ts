@@ -3,6 +3,7 @@ import {
   startOfMonth,
   endOfMonth,
   subMonths,
+  addMonths,
   format,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -125,54 +126,58 @@ export async function getUpcomingInvoices(limit = 6) {
 
 // ----------------------- RELATÓRIOS -----------------------
 
-export async function getReportData() {
+// Período padrão dos relatórios: últimos 6 meses.
+export function defaultReportRange() {
   const now = new Date();
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
+  return { start: startOfMonth(subMonths(now, 5)), end: endOfMonth(now) };
+}
+
+export async function getReportData(start: Date, end: Date) {
+  const paidInRange = { status: "PAID" as const, paidAt: { gte: start, lte: end } };
 
   const [
-    totalRevenueAgg,
+    rangeRevenue,
+    rangeExpenses,
     mrr,
-    monthRevenue,
-    monthExpenses,
     overdueAgg,
     avgTicketAgg,
     revenueByTypeRaw,
     topClientsRaw,
   ] = await Promise.all([
-    prisma.payment.aggregate({ _sum: { amount: true } }),
+    revenueInRange(start, end),
+    expensesInRange(start, end),
     getMRR(),
-    revenueInRange(monthStart, monthEnd),
-    expensesInRange(monthStart, monthEnd),
     prisma.invoice.aggregate({
       _sum: { amount: true },
       _count: { _all: true },
       where: { status: "OVERDUE" },
     }),
-    prisma.invoice.aggregate({ _avg: { amount: true }, where: { status: "PAID" } }),
+    prisma.invoice.aggregate({ _avg: { amount: true }, where: paidInRange }),
     prisma.invoice.groupBy({
       by: ["type"],
       _sum: { amount: true },
-      where: { status: "PAID" },
+      where: paidInRange,
     }),
     prisma.invoice.groupBy({
       by: ["clientId"],
       _sum: { amount: true },
-      where: { status: "PAID" },
+      where: paidInRange,
       orderBy: { _sum: { amount: "desc" } },
       take: 5,
     }),
   ]);
 
-  // Histórico 6 meses: receita, despesa, lucro
+  // Histórico mês a mês dentro do período (limite de 24 meses).
   const months: {
     label: string;
     receita: number;
     despesa: number;
     lucro: number;
   }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const ref = subMonths(now, i);
+  let ref = startOfMonth(start);
+  const lastMonth = startOfMonth(end);
+  let guard = 0;
+  while (ref <= lastMonth && guard < 24) {
     const s = startOfMonth(ref);
     const e = endOfMonth(ref);
     const [r, d] = await Promise.all([
@@ -180,11 +185,13 @@ export async function getReportData() {
       expensesInRange(s, e),
     ]);
     months.push({
-      label: format(ref, "MMM", { locale: ptBR }).replace(".", ""),
+      label: format(ref, "MMM/yy", { locale: ptBR }).replace(".", ""),
       receita: r,
       despesa: d,
       lucro: r - d,
     });
+    ref = addMonths(ref, 1);
+    guard++;
   }
 
   const revenueByType = { IMPLEMENTATION: 0, SUBSCRIPTION: 0, EXTRA: 0 } as Record<
@@ -211,12 +218,11 @@ export async function getReportData() {
 
   const mrrValue = mrr;
   return {
-    totalRevenue: toNumber(totalRevenueAgg._sum.amount),
+    totalRevenue: rangeRevenue,
+    expenses: rangeExpenses,
+    netProfit: rangeRevenue - rangeExpenses,
     mrr: mrrValue,
     arr: mrrValue * 12,
-    netProfitMonth: monthRevenue - monthExpenses,
-    monthRevenue,
-    monthExpenses,
     overdue: {
       amount: toNumber(overdueAgg._sum.amount),
       count: overdueAgg._count._all,

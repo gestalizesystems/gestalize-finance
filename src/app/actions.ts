@@ -195,6 +195,22 @@ export async function markPaid(formData: FormData) {
   revalidatePath("/");
 }
 
+// Exclui uma cobrança (e seus pagamentos).
+export async function deleteInvoice(formData: FormData) {
+  const id = String(formData.get("invoiceId"));
+  await prisma.payment.deleteMany({ where: { invoiceId: id } });
+  await prisma.invoice.delete({ where: { id } });
+  revalidatePath("/cobrancas");
+  revalidatePath("/");
+}
+
+// Exclui uma despesa.
+export async function deleteCost(formData: FormData) {
+  const id = String(formData.get("costId"));
+  await prisma.cost.delete({ where: { id } });
+  revalidatePath("/despesas");
+}
+
 // Executa o motor de cobrança manualmente (também roda no cron).
 export async function runBilling() {
   await generateDueInvoices(3); // gera com 3 dias de antecedência

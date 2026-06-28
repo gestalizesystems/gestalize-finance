@@ -62,3 +62,65 @@ body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ---------- Impressão (relatórios) ---------- */
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 16mm;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Estrutura: sai do modo "tela cheia" e mostra todo o conteúdo */
+  html,
+  body {
+    height: auto !important;
+    background: #fff !important;
+    color: #0f172a !important;
+  }
+  aside,
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .h-screen {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .overflow-hidden,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+  main {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Documento claro */
+  .report .card {
+    background: #fff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .report,
+  .report .text-white,
+  .report .text-slate-300,
+  .report .text-slate-400,
+  .report .text-slate-500 {
+    color: #0f172a !important;
+  }
+  .report .text-positive {
+    color: #15803d !important;
+  }
+  .report .text-negative {
+    color: #b91c1c !important;
+  }
+}

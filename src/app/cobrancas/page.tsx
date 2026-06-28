@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, Play, Mail, MessageCircle } from "lucide-react";
+import { ExternalLink, Play, Mail, MessageCircle, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { gatewayMode } from "@/lib/asaas";
@@ -11,6 +11,7 @@ import {
   runBilling,
   sendInvoiceEmail,
   sendInvoiceWhatsApp,
+  deleteInvoice,
 } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -142,6 +143,15 @@ export default async function CobrancasPage({
                     ) : (
                       <span className="text-xs text-slate-500">{inv.paidAt ? formatDate(inv.paidAt) : "Pago"}</span>
                     )}
+                    <form action={deleteInvoice}>
+                      <input type="hidden" name="invoiceId" value={inv.id} />
+                      <button
+                        title="Excluir cobrança"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-negative/15 text-negative hover:bg-negative/25"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </form>
                   </div>
                 </td>
               </tr>

@@ -38,8 +38,32 @@ async function getMRR() {
   }, 0);
 }
 
-export async function getDashboardMetrics() {
-  const now = new Date();
+// Meses que têm movimentação (pagamentos ou despesas) — p/ os filtros de mês.
+export async function getMonthsWithData(): Promise<{ value: string; label: string }[]> {
+  const [payments, costs] = await Promise.all([
+    prisma.payment.findMany({ select: { paidAt: true } }),
+    prisma.cost.findMany({ select: { date: true } }),
+  ]);
+  const set = new Set<string>();
+  const add = (d: Date) =>
+    set.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  for (const p of payments) add(p.paidAt);
+  for (const c of costs) add(c.date);
+  return Array.from(set)
+    .sort()
+    .reverse()
+    .map((v) => {
+      const [y, m] = v.split("-").map(Number);
+      const label = new Intl.DateTimeFormat("pt-BR", {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(y, m - 1, 1));
+      return { value: v, label: label.charAt(0).toUpperCase() + label.slice(1) };
+    });
+}
+
+export async function getDashboardMetrics(refDate: Date = new Date()) {
+  const now = refDate;
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
   const prevStart = startOfMonth(subMonths(now, 1));

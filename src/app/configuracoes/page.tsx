@@ -1,4 +1,4 @@
-import { Save, CreditCard, Mail, MessageCircle, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Save, CreditCard, Mail, MessageCircle, Clock, CheckCircle2, XCircle, CheckCheck } from "lucide-react";
 import { gatewayMode } from "@/lib/asaas";
 import { emailEnabled } from "@/lib/email";
 import { whatsappEnabled } from "@/lib/whatsapp";
@@ -9,7 +9,11 @@ import { saveCompanySettings } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function ConfiguracoesPage() {
+export default async function ConfiguracoesPage({
+  searchParams,
+}: {
+  searchParams: { saved?: string };
+}) {
   const cfg = await getSettings([
     SETTING_KEYS.companyName,
     SETTING_KEYS.companyCnpj,
@@ -30,6 +34,12 @@ export default async function ConfiguracoesPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Configurações" subtitle="Dados da empresa e status das integrações." />
+
+      {searchParams.saved && (
+        <div className="flex items-center gap-2 rounded-xl border border-positive/30 bg-positive/10 px-4 py-3 text-sm font-medium text-positive">
+          <CheckCheck className="h-4 w-4" /> Configurações salvas com sucesso!
+        </div>
+      )}
 
       {/* Dados da empresa */}
       <form action={saveCompanySettings} className="card space-y-4">

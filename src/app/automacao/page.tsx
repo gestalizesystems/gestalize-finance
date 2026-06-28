@@ -1,18 +1,11 @@
 import {
-  CreditCard,
-  Mail,
-  MessageCircle,
-  Clock,
   Play,
-  CheckCircle2,
-  XCircle,
   Bell,
   CalendarClock,
   AlertTriangle,
   Megaphone,
   ShieldAlert,
 } from "lucide-react";
-import { gatewayMode } from "@/lib/asaas";
 import { emailEnabled } from "@/lib/email";
 import { whatsappEnabled } from "@/lib/whatsapp";
 import { PageHeader } from "@/components/ui";
@@ -37,17 +30,8 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
 }
 
 export default function AutomacaoPage() {
-  const gateway = gatewayMode();
-  const gatewayOn = gateway !== "mock";
   const email = emailEnabled();
   const whats = whatsappEnabled();
-
-  const integrations = [
-    { icon: CreditCard, name: "Pagamentos (Asaas)", on: gatewayOn, detail: gateway.toUpperCase() },
-    { icon: Mail, name: "E-mail (Resend)", on: email, detail: email ? "Configurado" : "Sem chave" },
-    { icon: MessageCircle, name: "WhatsApp (Evolution)", on: whats, detail: whats ? "Configurado" : "Sem chave" },
-    { icon: Clock, name: "Cron diário", on: true, detail: "Agendado (9h)" },
-  ];
 
   return (
     <div className="space-y-6">
@@ -62,27 +46,6 @@ export default function AutomacaoPage() {
           </form>
         }
       />
-
-      {/* Status das integrações */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {integrations.map((i) => {
-          const Icon = i.icon;
-          return (
-            <div key={i.name} className="card flex items-center gap-3">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${i.on ? "bg-positive/15 text-positive" : "bg-slate-500/15 text-slate-400"}`}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">{i.name}</p>
-                <p className="flex items-center gap-1 text-xs text-slate-400">
-                  {i.on ? <CheckCircle2 className="h-3.5 w-3.5 text-positive" /> : <XCircle className="h-3.5 w-3.5 text-slate-500" />}
-                  {i.detail}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
       {/* Régua de cobrança */}
       <div className="card">

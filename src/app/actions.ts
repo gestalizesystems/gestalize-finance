@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createCharge } from "@/lib/asaas";
 import { sendEmail, renderInvoiceEmail } from "@/lib/email";
@@ -220,6 +221,7 @@ export async function saveMessageTemplates(formData: FormData) {
     [SETTING_KEYS.emailBody]: String(formData.get("emailBody") ?? ""),
   });
   revalidatePath("/mensagens");
+  redirect("/mensagens?saved=1");
 }
 
 // Salva os dados da empresa (Configurações).
@@ -234,6 +236,7 @@ export async function saveCompanySettings(formData: FormData) {
   });
   revalidatePath("/configuracoes");
   revalidatePath("/relatorios");
+  redirect("/configuracoes?saved=1");
 }
 
 // Executa o motor de cobrança manualmente (também roda no cron).

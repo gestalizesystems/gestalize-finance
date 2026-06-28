@@ -1,4 +1,4 @@
-import { MessageCircle, Mail, Save } from "lucide-react";
+import { MessageCircle, Mail, Save, CheckCheck } from "lucide-react";
 import { renderInvoiceEmail } from "@/lib/email";
 import { renderInvoiceWhatsApp } from "@/lib/whatsapp";
 import { getSettings, SETTING_KEYS, TEMPLATE_VARS } from "@/lib/settings";
@@ -15,7 +15,11 @@ const example = {
   paymentLink: "https://www.asaas.com/i/exemplo",
 };
 
-export default async function MensagensPage() {
+export default async function MensagensPage({
+  searchParams,
+}: {
+  searchParams: { saved?: string };
+}) {
   const cfg = await getSettings([
     SETTING_KEYS.waTemplate,
     SETTING_KEYS.emailSubject,
@@ -30,6 +34,12 @@ export default async function MensagensPage() {
         title="Mensagens"
         subtitle="Edite os modelos de cobrança enviados por WhatsApp e e-mail."
       />
+
+      {searchParams.saved && (
+        <div className="flex items-center gap-2 rounded-xl border border-positive/30 bg-positive/10 px-4 py-3 text-sm font-medium text-positive">
+          <CheckCheck className="h-4 w-4" /> Modelos salvos com sucesso!
+        </div>
+      )}
 
       {/* Variáveis disponíveis */}
       <div className="card">

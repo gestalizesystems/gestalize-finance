@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getMonthsWithData } from "@/lib/metrics";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
 import { MonthFilter } from "@/components/MonthFilter";
@@ -34,7 +35,7 @@ export default async function PagamentosPage({
 
   const where = range ? { paidAt: range } : {};
 
-  const [total, payments] = await Promise.all([
+  const [total, payments, monthsWithData] = await Promise.all([
     prisma.payment.count({ where }),
     prisma.payment.findMany({
       where,
@@ -43,6 +44,7 @@ export default async function PagamentosPage({
       take: PAGE_SIZE,
       include: { invoice: { include: { client: true } } },
     }),
+    getMonthsWithData(),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -59,7 +61,7 @@ export default async function PagamentosPage({
       <PageHeader
         title="Pagamentos"
         subtitle="Histórico de recebimentos confirmados."
-        action={<MonthFilter />}
+        action={<MonthFilter months={monthsWithData} />}
       />
 
       <div className="card overflow-x-auto">

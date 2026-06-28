@@ -70,7 +70,7 @@
   padding: 0 16px; margin-bottom: 20px; transition: border .15s, box-shadow .15s; background: #fff; }
 .auth .campo:focus-within { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(37,99,235,.14); }
 .auth .campo .ic { color: var(--azul); display: flex; flex: 0 0 auto; }
-.auth .campo input { flex: 1; border: none; outline: none; background: transparent; padding: 15px 0; font-size: 15px;
+.auth .campo input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; padding: 15px 0; font-size: 15px;
   font-family: inherit; color: var(--texto); }
 .auth .campo input::placeholder { color: #94a3b8; }
 .auth .olho { background: none; border: none; cursor: pointer; color: #94a3b8; padding: 4px; display: flex; }
@@ -95,7 +95,8 @@
   .auth { background: #fff; }
   .auth .deco { display: none; }
   .auth .esq { display: none; }
-  .auth .wrap { grid-template-columns: 1fr; max-width: 440px; padding: 26px 22px 40px; align-items: start; }
+  .auth .wrap { grid-template-columns: 1fr; width: 100%; max-width: 440px; padding: 26px 22px 40px; align-items: start; }
+  .auth .col-dir, .auth .campo, .auth .auth-card { min-width: 0; }
   .auth .marca-mob { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
   .auth .marca-mob img { width: 78px; height: 78px; object-fit: contain; }
   .auth .marca-mob .wm { font-size: 30px; font-weight: 800; letter-spacing: -1px; }

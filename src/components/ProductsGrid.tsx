@@ -74,7 +74,7 @@ function ProductModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-2xl border border-ink-700 bg-ink-850 p-6 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-ink-700 bg-ink-850 p-5 shadow-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between">
@@ -126,7 +126,7 @@ function ProductModal({
           {product.subscriptions} assinatura(s) ativa(s) vinculada(s).
         </p>
 
-        <div className="mt-6 flex items-center justify-end gap-2 border-t border-ink-700 pt-4">
+        <div className="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-ink-700 pt-4">
           <form action={toggleProductActive} onSubmit={onClose}>
             <input type="hidden" name="productId" value={product.id} />
             <button className="btn-ghost">

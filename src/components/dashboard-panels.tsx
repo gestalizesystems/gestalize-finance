@@ -20,17 +20,17 @@ export function BillingFlow() {
   return (
     <div className="card flex h-full flex-col">
       <h3 className="mb-5 font-semibold text-white">Fluxo de Cobrança</h3>
-      <div className="flex flex-1 items-center justify-between gap-1">
+      <div className="flex flex-1 items-start justify-between gap-1">
         {flowSteps.map((s) => {
           const Icon = s.icon;
           return (
             <div key={s.title} className="flex flex-1 flex-col items-center text-center">
-              <div className="flex items-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-brand-400">
-                  <Icon className="h-5 w-5" />
-                </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-brand-400">
+                <Icon className="h-5 w-5" />
               </div>
-              <p className="mt-2 text-xs font-semibold text-white leading-tight">{s.title}</p>
+              <p className="mt-2 flex min-h-[2rem] items-start justify-center text-xs font-semibold text-white leading-tight">
+                {s.title}
+              </p>
               <p className="text-[11px] text-slate-500 leading-tight">{s.sub}</p>
             </div>
           );

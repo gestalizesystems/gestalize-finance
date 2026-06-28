@@ -107,40 +107,62 @@ export async function createSubscription(formData: FormData) {
   revalidatePath("/assinaturas");
 }
 
-// Cria uma cobrança avulsa (ex: taxa de implementação) já com link de pagamento.
+// Cria uma cobrança avulsa já com link de pagamento.
+// Tipo "COMBO" = Implantação + Mensalidade: cria DUAS faturas (cada uma com
+// seu tipo, p/ a receita ficar correta) mas UM único pagamento do total.
 export async function createInvoice(formData: FormData) {
   const clientId = String(formData.get("clientId"));
   const client = await prisma.client.findUnique({ where: { id: clientId } });
   if (!client) return;
 
-  const amount = toNumber(formData.get("amount"));
   const dueDate = new Date(String(formData.get("dueDate")));
   const description = String(formData.get("description") || "Cobrança");
+  const type = String(formData.get("type") || "EXTRA");
+  const productId = (formData.get("productId") as string) || null;
 
-  const invoice = await prisma.invoice.create({
-    data: {
-      clientId,
-      productId: (formData.get("productId") as string) || null,
-      description,
-      type: (formData.get("type") as InvoiceType) || "EXTRA",
-      amount,
-      dueDate,
-      status: "PENDING",
-    },
-  });
+  const invoiceIds: string[] = [];
+  let total = 0;
 
+  if (type === "COMBO") {
+    const impl = toNumber(formData.get("implAmount"));
+    const sub = toNumber(formData.get("subAmount"));
+    total = impl + sub;
+    if (impl > 0) {
+      const i = await prisma.invoice.create({
+        data: { clientId, productId, description: `Implantação — ${description}`, type: "IMPLEMENTATION", amount: impl, dueDate, status: "PENDING" },
+      });
+      invoiceIds.push(i.id);
+    }
+    if (sub > 0) {
+      const i = await prisma.invoice.create({
+        data: { clientId, productId, description: `Mensalidade — ${description}`, type: "SUBSCRIPTION", amount: sub, dueDate, status: "PENDING" },
+      });
+      invoiceIds.push(i.id);
+    }
+  } else {
+    const amount = toNumber(formData.get("amount"));
+    total = amount;
+    const i = await prisma.invoice.create({
+      data: { clientId, productId, description, type: (type as InvoiceType) || "EXTRA", amount, dueDate, status: "PENDING" },
+    });
+    invoiceIds.push(i.id);
+  }
+
+  if (invoiceIds.length === 0) return;
+
+  // Um único pagamento no gateway para o total, vinculado a todas as faturas.
   try {
     const charge = await createCharge({
       customerName: client.name,
       customerEmail: client.email,
       customerDocument: client.document,
-      description,
-      amount,
+      description: type === "COMBO" ? `Implantação + Mensalidade — ${description}` : description,
+      amount: total,
       dueDate,
-      externalReference: invoice.id,
+      externalReference: invoiceIds[0],
     });
-    await prisma.invoice.update({
-      where: { id: invoice.id },
+    await prisma.invoice.updateMany({
+      where: { id: { in: invoiceIds } },
       data: { externalId: charge.externalId, paymentLink: charge.paymentLink },
     });
   } catch (e) {

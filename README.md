@@ -1,95 +1,162 @@
 # Gestalize Finance
 
-Sistema financeiro e de cobranças da **Gestalize Systems** — controle de
-entradas (implementação, mensalidades, avulsos), saídas (custos por sistema,
-ferramentas, servidores), assinaturas recorrentes e motor de cobrança com
-link de pagamento (Asaas).
+Sistema financeiro e de cobranças da **Gestalize Systems**. Controla receitas
+(implantação, mensalidades, avulsos) e despesas, gerencia **assinaturas
+recorrentes** e roda um **motor de cobrança** que gera o link de pagamento
+(Pix/boleto/cartão via Asaas), avisa o cliente por **e-mail (Resend)** e
+**WhatsApp (Evolution API)** e dá **baixa automática** quando o pagamento é
+confirmado (webhook do Asaas).
 
-## Stack
+> **Em produção:** <https://finance.gestalizesystems.com.br> (Railway).
 
-- **Next.js 14** (App Router, TypeScript) + **Tailwind CSS**
-- **Prisma** + **PostgreSQL** (via Docker)
-- **Recharts** (gráficos) · **lucide-react** (ícones)
-- Camada de pagamento **Asaas** (modo `mock` por padrão)
+---
 
-## Como rodar (local)
+## 📚 Documentação
 
-> Requer Node 18+. Na sua máquina: `nvm use 18.20.8`.
+| Documento | Conteúdo |
+|---|---|
+| **Este README** | Visão geral, requisitos, instalação, execução, build |
+| [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Estrutura de pastas, fluxos, módulos, autenticação, banco de dados |
+| [docs/VARIAVEIS.md](docs/VARIAVEIS.md) | Todas as variáveis de ambiente (obrigatórias/opcionais) |
+| [docs/INTEGRACOES.md](docs/INTEGRACOES.md) | Asaas, Resend e Evolution API (configuração, fluxo, erros) |
+| [docs/CRON.md](docs/CRON.md) | Motor de cobrança diário (cron job) |
+| [docs/API.md](docs/API.md) | Endpoints HTTP (login, logout, cron, webhook) |
+| [docs/MANUTENCAO.md](docs/MANUTENCAO.md) | Guia para evoluir o projeto (rotas, serviços, integrações) |
+| [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md) | Passo a passo de deploy em produção |
+
+---
+
+## ✨ Funcionalidades
+
+- **Dashboard** com métricas (receita, MRR/ARR, inadimplência, ticket médio) e gráficos.
+- **Clientes** — cadastro com CPF/CNPJ, busca, resumo financeiro por cliente (lucro por cliente).
+- **Produtos/Serviços** — catálogo com preço de mensalidade e de implantação.
+- **Assinaturas** — planos recorrentes (mensal/anual) com dia de vencimento.
+- **Cobranças** — faturas (implantação, mensalidade, avulso e **combo "Implantação + Mensalidade"**), geração de link de pagamento e baixa manual.
+- **Pagamentos / Receitas / Despesas** — históricos com filtro por mês.
+- **Relatórios** — período personalizável + geração de **PDF** com logo da empresa.
+- **Automação** — régua de cobrança (lembrete antes do vencimento, aviso de atraso).
+- **Mensagens** — templates editáveis de e-mail e WhatsApp (variáveis dinâmicas).
+- **Configurações** — dados da empresa e status das integrações.
+- **Login privado** com sessão por cookie assinado e **2FA (TOTP)** opcional.
+- Interface **100% responsiva** (drawer no mobile, sidebar no desktop).
+
+---
+
+## 🧰 Tecnologias
+
+| Camada | Tecnologia |
+|---|---|
+| Framework | **Next.js 14.2** (App Router, Server Components, Server Actions, TypeScript) |
+| Estilo | **Tailwind CSS** |
+| Banco | **PostgreSQL** + **Prisma ORM** |
+| Gráficos / Ícones | **Recharts** · **lucide-react** |
+| Utilitários | **date-fns** · **clsx** · **tailwind-merge** |
+| Pagamento | **Asaas** (REST, sem SDK) |
+| E-mail | **Resend** (REST) |
+| WhatsApp | **Evolution API** self-hosted (REST) |
+| Autenticação | Sessão HMAC-SHA256 (Web Crypto) + TOTP (RFC 6238) |
+
+Não há dependências de SDK das integrações nem de bibliotecas de auth — tudo é
+feito com `fetch` e Web Crypto nativos.
+
+---
+
+## ✅ Requisitos
+
+- **Node.js ≥ 18.18** (recomendado 18.20.x). Na máquina do dev: `nvm use 18.20.8`.
+- **npm** (vem com o Node).
+- **Docker** (para subir o PostgreSQL local) — ou um PostgreSQL já instalado.
+- Contas externas **opcionais** (o sistema funciona sem elas, em modo "mock"/desligado):
+  - **Asaas** — gateway de pagamento.
+  - **Resend** — envio de e-mail.
+  - **Evolution API** — envio de WhatsApp (instância self-hosted).
+
+---
+
+## 🚀 Instalação e execução (local)
 
 ```bash
-# 1. Sobe o banco (Postgres na porta 5433 p/ não conflitar com o Postgres nativo)
+# 1. Clonar
+git clone https://github.com/nathashaloppes/Gestalize-Finance.git
+cd Gestalize-Finance
+
+# 2. Garantir o Node correto
+nvm use 18.20.8            # ou qualquer Node >= 18.18
+
+# 3. Instalar dependências (o postinstall roda `prisma generate`)
+npm install
+
+# 4. Configurar o ambiente
+cp .env.example .env
+#   edite o .env conforme docs/VARIAVEIS.md (o mínimo já vem pronto p/ local)
+
+# 5. Subir o banco (PostgreSQL via Docker, exposto na porta 5433)
 docker compose up -d
 
-# 2. Aplica o schema e popula com dados de exemplo
+# 6. Aplicar o schema e popular com dados de exemplo
 npx prisma migrate dev
-npm run seed
+npm run seed              # opcional: dados de demonstração
 
-# 3. Sobe o app (porta 3010 p/ não conflitar com o app Rails na 3000)
+# 7. Rodar em desenvolvimento (porta 3010)
 npm run dev
 # abra http://localhost:3010
 ```
 
-Scripts úteis:
+> O login local usa `AUTH_EMAIL` / `AUTH_PASSWORD` definidos no `.env`.
 
-- `npm run seed` — popula o banco com dados de demonstração
-- `npm run db:studio` — abre o Prisma Studio (visualizar/editar dados)
+### Build e produção (local)
 
-## Estrutura
+```bash
+npm run build             # compila (lint + types + build)
+npm run start             # sobe o servidor de produção
+```
+
+Em produção real (Railway), o deploy roda automaticamente
+`npx prisma migrate deploy && npm run start` — ver [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md).
+
+---
+
+## 📜 Scripts npm
+
+| Script | O que faz |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento na porta **3010** |
+| `npm run build` | Build de produção (inclui lint e checagem de tipos) |
+| `npm run start` | Servidor de produção (`next start`) |
+| `npm run lint` | ESLint (`next lint`) |
+| `npm run seed` | Popula o banco com dados de exemplo (`prisma/seed.ts`) |
+| `npm run db:studio` | Abre o **Prisma Studio** (visualizar/editar dados) |
+| `npm run db:migrate:deploy` | Aplica migrações pendentes (usado no deploy) |
+| `postinstall` | `prisma generate` (roda sozinho após `npm install`) |
+
+---
+
+## 🗂️ Estrutura resumida
 
 ```
 src/
-  app/
-    page.tsx              # Dashboard
-    clientes/             # CRUD de clientes
-    cobrancas/            # Faturas + dar baixa + gerar cobrança avulsa
-    assinaturas/          # Planos recorrentes
-    produtos/             # Sistemas/serviços vendidos
-    despesas/             # Custos (saídas)
-    pagamentos/ receitas/ # Históricos
-    relatorios/ automacao/ mensagens/ configuracoes/  # Roadmap
-    actions.ts            # Server actions (criar/baixar/billing)
-    api/cron/billing/     # Endpoint do cron diário
-  lib/
-    prisma.ts             # Cliente Prisma (singleton)
-    asaas.ts              # Gateway de pagamento (mock | sandbox | live)
-    billing.ts            # Motor de cobrança (gera faturas, atrasos)
-    metrics.ts            # Agregações do dashboard (receita, MRR, etc.)
-    utils.ts              # Formatadores (R$, datas)
+  app/                  # Rotas (App Router): páginas + endpoints de API
+    actions.ts          # Server Actions (criar/baixar/billing/configs)
+    api/                # login, logout, cron/billing, webhooks/asaas
+  components/           # Componentes de UI (Sidebar, AppShell, charts, forms…)
+  lib/                  # Regras e integrações (prisma, asaas, billing, email,
+                        #   whatsapp, auth, totp, settings, metrics, masks…)
 prisma/
-  schema.prisma          # Modelo de dados
-  seed.ts                # Dados de exemplo
+  schema.prisma         # Modelo de dados (7 tabelas)
+  migrations/           # Histórico de migrações
+  seed.ts               # Dados de exemplo
+docs/                   # Documentação detalhada
 ```
 
-## Motor de cobrança
+Detalhes completos em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
-`src/lib/billing.ts` contém a lógica central:
+---
 
-- `generateDueInvoices()` — gera faturas das assinaturas no vencimento
-- `markOverdueInvoices()` — marca atrasos e inadimplência
-- `registerPayment()` — dá baixa e reativa o cliente
+## ⚙️ Notas do ambiente local
 
-Pode ser disparado:
-- manualmente pelo botão **"Rodar motor de cobrança"** em `/cobrancas`
-- pelo endpoint `GET /api/cron/billing` (agende um cron job diário)
-
-## Ativando o Asaas (pagamentos reais)
-
-Por padrão roda em **mock** (gera links fake, sem conta). Para ativar:
-
-1. Crie conta no Asaas e gere uma API key (comece pelo **sandbox**).
-2. No `.env`:
-   ```
-   ASAAS_MODE="sandbox"
-   ASAAS_API_KEY="sua_chave"
-   ASAAS_BASE_URL="https://sandbox.asaas.com/api/v3"
-   ```
-3. Reinicie o app. As novas cobranças passam a gerar Pix/boleto/cartão reais.
-
-Falta plugar ainda (próximas etapas): **webhook** do Asaas para confirmar
-pagamento automaticamente, e os envios de **WhatsApp** (Z-API/Twilio) e
-**e-mail** (Resend) da régua de cobrança.
-
-## Notas do ambiente local
-
-- Há um **Postgres nativo** na porta 5432 → o Docker usa a **5433**.
-- Há um **app Rails** na porta 3000 → o Next usa a **3010**.
+- O `docker-compose.yml` expõe o PostgreSQL na porta **5433** (para não conflitar
+  com um Postgres nativo na 5432). O `.env` local deve apontar para `localhost:5433`.
+- O `npm run dev` usa a porta **3010**.
+- As integrações (Asaas/Resend/Evolution) são **opcionais**: sem chaves, o Asaas
+  roda em `mock` (links fake) e e-mail/WhatsApp são apenas ignorados (sem erro).

@@ -109,7 +109,7 @@ export async function generateDueInvoices(horizonDays = 0) {
       }
     }
 
-    // Envia WhatsApp de cobrança (se o cliente tiver telefone e o Z-API estiver ligado).
+    // Envia WhatsApp de cobrança (se o cliente tiver telefone e a Evolution estiver ligada).
     if (sub.client.phone) {
       try {
         const message = await renderInvoiceWhatsApp({

@@ -136,7 +136,7 @@ async function main() {
   for (let m = 5; m >= 0; m--) {
     const monthRef = startOfMonth(subMonths(now, m));
     await prisma.cost.create({ data: { description: "Servidor / Hospedagem (VPS)", amount: 320, category: "SERVER", recurring: true, date: monthRef } });
-    await prisma.cost.create({ data: { description: "API WhatsApp (Z-API)", amount: 99, category: "API", recurring: true, date: monthRef } });
+    await prisma.cost.create({ data: { description: "API WhatsApp (Evolution)", amount: 99, category: "API", recurring: true, date: monthRef } });
     await prisma.cost.create({ data: { description: "Ferramentas / SaaS diversos", amount: 180, category: "FIXED", recurring: true, date: monthRef } });
     await prisma.cost.create({ data: { description: "Custo direto cliente Empresa Exemplo", amount: 120, category: "PER_CLIENT", clientId: exemplo.id, productId: pdv.id, date: monthRef } });
   }

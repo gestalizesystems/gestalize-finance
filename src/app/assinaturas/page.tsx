@@ -35,6 +35,7 @@ export default async function AssinaturasPage({
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const hrefForPage = (p: number) => `/assinaturas?page=${p}`;
+  const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
 
   return (
     <div className="space-y-6">
@@ -58,8 +59,13 @@ export default async function AssinaturasPage({
             <option value="MONTHLY">Mensal</option>
             <option value="YEARLY">Anual</option>
           </select>
-          <input name="dueDay" type="number" min={1} max={28} defaultValue={5} placeholder="Dia venc." className="input" />
+          <input name="startDate" type="date" required min={today} defaultValue={today} title="Data da 1ª cobrança" className="input" />
         </div>
+        <p className="text-xs text-slate-500">
+          📅 A <span className="text-slate-300">data acima</span> é a da <span className="text-slate-300">1ª cobrança</span>:
+          escolha um dia <span className="text-slate-300">deste mês</span> para começar a cobrar agora, ou do
+          <span className="text-slate-300"> mês seguinte</span> para começar depois. As próximas seguem o mesmo dia, a cada ciclo.
+        </p>
         <button className="btn-primary">+ Criar assinatura</button>
       </form>
 

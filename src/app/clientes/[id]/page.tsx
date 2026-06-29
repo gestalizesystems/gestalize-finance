@@ -19,7 +19,7 @@ import { StatCard, InvoiceStatusBadge, ClientStatusBadge } from "@/components/ui
 export const dynamic = "force-dynamic";
 
 const typeLabel: Record<string, string> = {
-  IMPLEMENTATION: "Implementação",
+  IMPLEMENTATION: "Implantação",
   SUBSCRIPTION: "Mensalidade",
   EXTRA: "Avulso",
 };
@@ -75,7 +75,7 @@ export default async function ClienteResumoPage({
       _sum: { amount: true },
       where: { invoice: { clientId: id } },
     }),
-    // Implementação recebida
+    // Implantação recebida
     prisma.invoice.aggregate({
       _sum: { amount: true },
       where: { clientId: id, type: "IMPLEMENTATION", status: "PAID" },

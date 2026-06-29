@@ -12,8 +12,6 @@ import {
   generateDueInvoices,
   markOverdueInvoices,
   registerPayment,
-  advanceDueDate,
-  withDueDay,
 } from "@/lib/billing";
 import type { BillingCycle, CostCategory, ProductType, InvoiceType } from "@prisma/client";
 
@@ -87,12 +85,13 @@ export async function createSubscription(formData: FormData) {
   const product = await prisma.product.findUnique({ where: { id: productId } });
   const amountRaw = formData.get("amount");
   const amount = amountRaw ? toNumber(amountRaw) : toNumber(product?.defaultPrice);
-  const dueDay = Number(formData.get("dueDay") || 5);
   const cycle = (formData.get("cycle") as BillingCycle) || "MONTHLY";
 
-  // Próximo vencimento: próximo dia "dueDay" a partir de hoje.
-  let next = withDueDay(new Date(), dueDay);
-  if (next < new Date()) next = advanceDueDate(next, cycle);
+  // Data da 1ª cobrança escolhida pelo usuário (no fuso local); fallback: hoje.
+  const startRaw = String(formData.get("startDate") || "");
+  const next = startRaw ? new Date(`${startRaw}T00:00:00`) : new Date();
+  // Dia do vencimento recorrente = dia da 1ª cobrança (limitado a 1–28).
+  const dueDay = Math.min(Math.max(next.getDate(), 1), 28);
 
   await prisma.subscription.create({
     data: {

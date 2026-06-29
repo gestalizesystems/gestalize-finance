@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 15;
 
 const typeLabel: Record<string, string> = {
-  IMPLEMENTATION: "Implementação",
+  IMPLEMENTATION: "Implantação",
   SUBSCRIPTION: "Mensalidade",
   EXTRA: "Avulso",
 };
@@ -57,7 +57,7 @@ export default async function ReceitasPage({
     <div className="space-y-6">
       <PageHeader
         title="Receitas"
-        subtitle="Entradas confirmadas: implementação, mensalidades e avulsos."
+        subtitle="Entradas confirmadas: implantação, mensalidades e avulsos."
         action={<MonthFilter months={monthsWithData} />}
       />
 

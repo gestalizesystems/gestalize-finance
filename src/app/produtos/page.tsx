@@ -35,7 +35,7 @@ export default async function ProdutosPage() {
           <input name="name" required placeholder="Nome do sistema/serviço" className="input" />
           <input name="description" placeholder="Descrição" className="input" />
           <input name="defaultPrice" type="number" step="0.01" required placeholder="Mensalidade (R$)" className="input" />
-          <input name="implementationPrice" type="number" step="0.01" placeholder="Implementação (R$)" className="input" />
+          <input name="implementationPrice" type="number" step="0.01" placeholder="Implantação (R$)" className="input" />
           <select name="type" className="input">
             <option value="RECURRING">Mensalidade</option>
             <option value="ONE_TIME">Avulso</option>

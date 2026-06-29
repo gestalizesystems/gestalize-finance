@@ -91,13 +91,13 @@ async function main() {
         data: { invoiceId: inv.id, amount: s.amount, method: "PIX", paidAt: addDays(due, 1) },
       });
     }
-    // Implementação avulsa em alguns meses (entrada única).
+    // Implantação avulsa em alguns meses (entrada única).
     if (m % 2 === 0) {
       const inv = await prisma.invoice.create({
         data: {
           clientId: exemplo.id,
           productId: pdv.id,
-          description: "Taxa de implementação Sistema PDV",
+          description: "Taxa de implantação Sistema PDV",
           type: "IMPLEMENTATION",
           amount: 800,
           dueDate: addDays(monthRef, 10),

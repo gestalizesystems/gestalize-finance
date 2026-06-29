@@ -113,7 +113,7 @@ function ProductModal({
             </p>
           </div>
           <div className="rounded-xl border border-ink-700 bg-ink-900 p-4">
-            <p className="text-xs text-slate-500">Implementação</p>
+            <p className="text-xs text-slate-500">Implantação</p>
             <p className="mt-1 text-xl font-bold text-white">
               {product.implementationPrice
                 ? formatCurrency(product.implementationPrice)

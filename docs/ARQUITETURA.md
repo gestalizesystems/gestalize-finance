@@ -16,6 +16,33 @@ Navegador ──► Next.js (App Router)
                        Asaas · Resend · Evolution API (REST via fetch)
 ```
 
+### Diagrama de arquitetura
+
+```mermaid
+flowchart TD
+    User([Navegador]) --> MW["middleware.ts<br/>(exige sessão)"]
+    MW -->|sem sessão| Login["/login"]
+    MW -->|com sessão| Pages["Páginas<br/>(Server Components)"]
+    Pages --> Prisma[(Prisma)]
+    Pages -->|mutações| Actions["Server Actions<br/>(actions.ts)"]
+    Actions --> Prisma
+    Prisma --> DB[(PostgreSQL)]
+
+    subgraph API["Route Handlers /api"]
+      LoginAPI[login] --- LogoutAPI[logout]
+      Cron["cron/billing"] --- Webhook["webhooks/asaas"]
+    end
+
+    Cronjob(["cron-job.org"]) -->|Bearer CRON_SECRET| Cron
+    Cron --> Billing["lib/billing.ts"]
+    Billing --> Prisma
+    Actions --> Libs["lib: asaas · email · whatsapp"]
+    Billing --> Libs
+    Webhook --> Prisma
+    Libs --> Ext{{"Asaas · Resend · Evolution"}}
+    Ext -.webhook de pagamento.-> Webhook
+```
+
 ## Estrutura de pastas
 
 ```
@@ -110,6 +137,24 @@ Detalhes do 2FA em [INTEGRACOES.md](INTEGRACOES.md) não se aplicam — veja
 Cada integração é isolada em seu módulo `lib/*` e **degrada com elegância**
 (se não configurada, é ignorada sem quebrar o fluxo).
 
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant App as Gestalize Finance
+    participant Asaas
+    participant Canais as Resend / Evolution
+    participant Cliente
+
+    Admin->>App: Cria cobrança (ou cron diário)
+    App->>Asaas: createCharge (POST /payments)
+    Asaas-->>App: externalId + paymentLink
+    App->>Canais: envia e-mail + WhatsApp (com link)
+    Canais-->>Cliente: cobrança com link de pagamento
+    Cliente->>Asaas: paga (Pix / boleto / cartão)
+    Asaas->>App: webhook PAYMENT_RECEIVED
+    App->>App: cria Payment + marca Invoice = PAID
+```
+
 ## Banco de dados (visão geral)
 
 PostgreSQL via Prisma. **7 tabelas** e 8 enums.
@@ -123,6 +168,67 @@ PostgreSQL via Prisma. **7 tabelas** e 8 enums.
 | `Payment` | Pagamento de uma fatura (valor, método, data) | N—1 `Invoice` |
 | `Cost` | Despesa/custo (categoria, valor, data) | N—1 `Client`/`Product` (opcional) |
 | `Setting` | Configuração key-value (dados da empresa + templates) | — |
+
+### Diagrama de entidades (ER)
+
+```mermaid
+erDiagram
+    Client ||--o{ Subscription : tem
+    Client ||--o{ Invoice : tem
+    Client ||--o{ Cost : "pode ter"
+    Product ||--o{ Subscription : usado_em
+    Product ||--o{ Invoice : usado_em
+    Product ||--o{ Cost : "pode ter"
+    Subscription ||--o{ Invoice : gera
+    Invoice ||--o{ Payment : recebe
+
+    Client {
+      string id PK
+      string name
+      string document "CPF/CNPJ"
+      ClientStatus status
+    }
+    Product {
+      string id PK
+      string name
+      decimal defaultPrice "mensalidade"
+      decimal implementationPrice "implantação"
+      ProductType type
+      bool active
+    }
+    Subscription {
+      string id PK
+      decimal amount
+      BillingCycle cycle
+      datetime nextDueDate
+      SubscriptionStatus status
+    }
+    Invoice {
+      string id PK
+      InvoiceType type
+      decimal amount
+      datetime dueDate
+      InvoiceStatus status
+      string externalId "id no Asaas"
+      string paymentLink
+    }
+    Payment {
+      string id PK
+      decimal amount
+      PaymentMethod method
+      datetime paidAt
+    }
+    Cost {
+      string id PK
+      string description
+      decimal amount
+      CostCategory category
+    }
+    Setting {
+      string key PK
+      string value
+    }
+```
 
 ### Enums
 

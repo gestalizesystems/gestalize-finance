@@ -23,6 +23,7 @@ confirmado (webhook do Asaas).
 | [docs/API.md](docs/API.md) | Endpoints HTTP (login, logout, cron, webhook) |
 | [docs/MANUTENCAO.md](docs/MANUTENCAO.md) | Guia para evoluir o projeto (rotas, serviços, integrações) |
 | [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md) | Passo a passo de deploy em produção |
+| [CHANGELOG.md](CHANGELOG.md) | Histórico de versões e mudanças |
 
 ---
 

@@ -68,6 +68,7 @@ export async function deleteProduct(formData: FormData) {
 }
 
 export async function createCost(formData: FormData) {
+  const dateRaw = String(formData.get("date") || "");
   await prisma.cost.create({
     data: {
       description: String(formData.get("description") || "").trim(),
@@ -75,6 +76,8 @@ export async function createCost(formData: FormData) {
       category: (formData.get("category") as CostCategory) || "OTHER",
       recurring: formData.get("recurring") === "on",
       clientId: (formData.get("clientId") as string) || null,
+      // Data escolhida (meio-dia p/ evitar deslize de fuso); vazio = hoje (default).
+      ...(dateRaw ? { date: new Date(`${dateRaw}T12:00:00`) } : {}),
     },
   });
   revalidatePath("/despesas");

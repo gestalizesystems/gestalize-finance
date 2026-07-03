@@ -1,6 +1,29 @@
-# Gestalize Finance
+<p align="center">
+  <img src="./banner1.png" alt="Gestalize Finance Banner" width="100%">
+</p>
 
-Financial management and billing platform for recurring-revenue businesses.
+<h1 align="center">Gestalize Finance</h1>
+
+<p align="center">
+  Financial Management & Recurring Billing Platform
+</p>
+
+<p align="center">
+  Manage customers, subscriptions, invoicing, recurring revenue and financial operations through a modern, centralized platform.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
+</p>
+
+<p align="center">
+  Developed by <strong>Gestalize Systems</strong>
+</p>
+
+---
 
 ## Overview
 

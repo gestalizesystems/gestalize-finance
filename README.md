@@ -1,163 +1,84 @@
 # Gestalize Finance
 
-Sistema financeiro e de cobranças da **Gestalize Systems**. Controla receitas
-(implantação, mensalidades, avulsos) e despesas, gerencia **assinaturas
-recorrentes** e roda um **motor de cobrança** que gera o link de pagamento
-(Pix/boleto/cartão via Asaas), avisa o cliente por **e-mail (Resend)** e
-**WhatsApp (Evolution API)** e dá **baixa automática** quando o pagamento é
-confirmado (webhook do Asaas).
+Sistema de gestão financeira e de cobranças desenvolvido para a Gestalize
+Systems. A plataforma centraliza o controle de receitas e despesas, administra
+assinaturas recorrentes e automatiza todo o ciclo de cobrança — da geração da
+fatura à confirmação do pagamento.
 
-> **Em produção:** <https://finance.gestalizesystems.com.br> (Railway).
+## Sobre o projeto
 
----
+O objetivo é substituir controles manuais (planilhas e conferências avulsas) por
+um fluxo único e automatizado. A partir do cadastro de clientes, produtos e
+assinaturas, o sistema gera as cobranças no vencimento, notifica o cliente,
+disponibiliza um link de pagamento e concilia o recebimento de forma automática,
+mantendo receitas, despesas e indicadores sempre atualizados.
 
-## 📚 Documentação
+## Principais funcionalidades
 
-| Documento | Conteúdo |
-|---|---|
-| **Este README** | Visão geral, requisitos, instalação, execução, build |
-| [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Estrutura de pastas, fluxos, módulos, autenticação, banco de dados |
-| [docs/VARIAVEIS.md](docs/VARIAVEIS.md) | Todas as variáveis de ambiente (obrigatórias/opcionais) |
-| [docs/INTEGRACOES.md](docs/INTEGRACOES.md) | Asaas, Resend e Evolution API (configuração, fluxo, erros) |
-| [docs/CRON.md](docs/CRON.md) | Motor de cobrança diário (cron job) |
-| [docs/API.md](docs/API.md) | Endpoints HTTP (login, logout, cron, webhook) |
-| [docs/MANUTENCAO.md](docs/MANUTENCAO.md) | Guia para evoluir o projeto (rotas, serviços, integrações) |
-| [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md) | Passo a passo de deploy em produção |
-| [CHANGELOG.md](CHANGELOG.md) | Histórico de versões e mudanças |
+- Painel com indicadores financeiros (receita, receita recorrente, ticket médio,
+  inadimplência) e gráficos de evolução.
+- Cadastro de clientes com resumo e apuração de resultado por cliente.
+- Catálogo de produtos e serviços, com valores de mensalidade e de implantação.
+- Assinaturas recorrentes (mensais e anuais) com controle de vencimento.
+- Geração de cobranças, incluindo o modelo combinado de implantação e
+  mensalidade em um único pagamento.
+- Régua de cobrança automatizada, com aviso de vencimento e de atraso.
+- Conciliação automática do pagamento e baixa da fatura.
+- Relatórios por período e emissão de documento em PDF.
+- Modelos de mensagem editáveis para os canais de comunicação.
+- Acesso privado com autenticação e segundo fator (2FA) opcional.
+- Interface responsiva, adaptada para uso em computador, tablet e celular.
 
----
+## Arquitetura e decisões técnicas
 
-## ✨ Funcionalidades
+O sistema foi construído como uma aplicação única em Next.js (App Router). As
+telas são renderizadas no servidor e as operações de escrita usam Server
+Actions, dispensando uma camada de API tradicional para o uso interno. Alguns
+poucos endpoints existem apenas para integrações externas e tarefas agendadas.
 
-- **Dashboard** com métricas (receita, MRR/ARR, inadimplência, ticket médio) e gráficos.
-- **Clientes** — cadastro com CPF/CNPJ, busca, resumo financeiro por cliente (lucro por cliente).
-- **Produtos/Serviços** — catálogo com preço de mensalidade e de implantação.
-- **Assinaturas** — planos recorrentes (mensal/anual) com dia de vencimento.
-- **Cobranças** — faturas (implantação, mensalidade, avulso e **combo "Implantação + Mensalidade"**), geração de link de pagamento e baixa manual.
-- **Pagamentos / Receitas / Despesas** — históricos com filtro por mês.
-- **Relatórios** — período personalizável + geração de **PDF** com logo da empresa.
-- **Automação** — régua de cobrança (lembrete antes do vencimento, aviso de atraso).
-- **Mensagens** — templates editáveis de e-mail e WhatsApp (variáveis dinâmicas).
-- **Configurações** — dados da empresa e status das integrações.
-- **Login privado** com sessão por cookie assinado e **2FA (TOTP)** opcional.
-- Interface **100% responsiva** (drawer no mobile, sidebar no desktop).
+Decisões que orientaram a construção:
 
----
+- Camada de dados com Prisma sobre PostgreSQL, com modelo de dados normalizado e
+  migrações versionadas.
+- Autenticação implementada com primitivas nativas de criptografia (sem
+  bibliotecas de terceiros), incluindo sessão assinada e segundo fator TOTP.
+- Integrações externas consumidas por REST, isoladas em módulos próprios e com
+  degradação graciosa — quando um serviço não está configurado, a funcionalidade
+  é simplesmente ignorada, sem afetar o restante do fluxo.
+- Motor de cobrança idempotente, projetado para ser executado por um agendador e
+  não duplicar faturas.
+- Conciliação de pagamentos por webhook, com suporte a cenários de pagamento,
+  atraso, cancelamento e estorno.
+- Entrega contínua: cada atualização na branch principal é publicada
+  automaticamente no ambiente de produção.
 
-## 🧰 Tecnologias
+A descrição detalhada da arquitetura, dos fluxos e do modelo de dados está em
+[docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
-| Camada | Tecnologia |
-|---|---|
-| Framework | **Next.js 14.2** (App Router, Server Components, Server Actions, TypeScript) |
-| Estilo | **Tailwind CSS** |
-| Banco | **PostgreSQL** + **Prisma ORM** |
-| Gráficos / Ícones | **Recharts** · **lucide-react** |
-| Utilitários | **date-fns** · **clsx** · **tailwind-merge** |
-| Pagamento | **Asaas** (REST, sem SDK) |
-| E-mail | **Resend** (REST) |
-| WhatsApp | **Evolution API** self-hosted (REST) |
-| Autenticação | Sessão HMAC-SHA256 (Web Crypto) + TOTP (RFC 6238) |
+## Tecnologias
 
-Não há dependências de SDK das integrações nem de bibliotecas de auth — tudo é
-feito com `fetch` e Web Crypto nativos.
+- Next.js 14 (App Router, Server Components e Server Actions) com TypeScript
+- Tailwind CSS
+- PostgreSQL com Prisma ORM
+- Recharts (gráficos) e lucide-react (ícones)
+- Integrações de pagamento, e-mail e mensageria via REST
 
----
-
-## ✅ Requisitos
-
-- **Node.js ≥ 18.18** (recomendado 18.20.x). Na máquina do dev: `nvm use 18.20.8`.
-- **npm** (vem com o Node).
-- **Docker** (para subir o PostgreSQL local) — ou um PostgreSQL já instalado.
-- Contas externas **opcionais** (o sistema funciona sem elas, em modo "mock"/desligado):
-  - **Asaas** — gateway de pagamento.
-  - **Resend** — envio de e-mail.
-  - **Evolution API** — envio de WhatsApp (instância self-hosted).
-
----
-
-## 🚀 Instalação e execução (local)
-
-```bash
-# 1. Clonar
-git clone https://github.com/nathashaloppes/Gestalize-Finance.git
-cd Gestalize-Finance
-
-# 2. Garantir o Node correto
-nvm use 18.20.8            # ou qualquer Node >= 18.18
-
-# 3. Instalar dependências (o postinstall roda `prisma generate`)
-npm install
-
-# 4. Configurar o ambiente
-cp .env.example .env
-#   edite o .env conforme docs/VARIAVEIS.md (o mínimo já vem pronto p/ local)
-
-# 5. Subir o banco (PostgreSQL via Docker, exposto na porta 5433)
-docker compose up -d
-
-# 6. Aplicar o schema e popular com dados de exemplo
-npx prisma migrate dev
-npm run seed              # opcional: dados de demonstração
-
-# 7. Rodar em desenvolvimento (porta 3010)
-npm run dev
-# abra http://localhost:3010
-```
-
-> O login local usa `AUTH_EMAIL` / `AUTH_PASSWORD` definidos no `.env`.
-
-### Build e produção (local)
-
-```bash
-npm run build             # compila (lint + types + build)
-npm run start             # sobe o servidor de produção
-```
-
-Em produção real (Railway), o deploy roda automaticamente
-`npx prisma migrate deploy && npm run start` — ver [DEPLOY-RAILWAY.md](DEPLOY-RAILWAY.md).
-
----
-
-## 📜 Scripts npm
-
-| Script | O que faz |
-|---|---|
-| `npm run dev` | Servidor de desenvolvimento na porta **3010** |
-| `npm run build` | Build de produção (inclui lint e checagem de tipos) |
-| `npm run start` | Servidor de produção (`next start`) |
-| `npm run lint` | ESLint (`next lint`) |
-| `npm run seed` | Popula o banco com dados de exemplo (`prisma/seed.ts`) |
-| `npm run db:studio` | Abre o **Prisma Studio** (visualizar/editar dados) |
-| `npm run db:migrate:deploy` | Aplica migrações pendentes (usado no deploy) |
-| `postinstall` | `prisma generate` (roda sozinho após `npm install`) |
-
----
-
-## 🗂️ Estrutura resumida
+## Estrutura do projeto
 
 ```
 src/
-  app/                  # Rotas (App Router): páginas + endpoints de API
-    actions.ts          # Server Actions (criar/baixar/billing/configs)
-    api/                # login, logout, cron/billing, webhooks/asaas
-  components/           # Componentes de UI (Sidebar, AppShell, charts, forms…)
-  lib/                  # Regras e integrações (prisma, asaas, billing, email,
-                        #   whatsapp, auth, totp, settings, metrics, masks…)
-prisma/
-  schema.prisma         # Modelo de dados (7 tabelas)
-  migrations/           # Histórico de migrações
-  seed.ts               # Dados de exemplo
-docs/                   # Documentação detalhada
+  app/          Rotas: páginas, Server Actions e endpoints de integração
+  components/   Componentes de interface
+  lib/          Regras de negócio e integrações (dados, cobrança, notificações)
+prisma/         Modelo de dados e migrações
+docs/           Documentação técnica
 ```
 
-Detalhes completos em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+## Documentação
 
----
+- [docs/ARQUITETURA.md](docs/ARQUITETURA.md) — arquitetura, fluxos e modelo de dados
+- [CHANGELOG.md](CHANGELOG.md) — histórico de versões
 
-## ⚙️ Notas do ambiente local
+## Status
 
-- O `docker-compose.yml` expõe o PostgreSQL na porta **5433** (para não conflitar
-  com um Postgres nativo na 5432). O `.env` local deve apontar para `localhost:5433`.
-- O `npm run dev` usa a porta **3010**.
-- As integrações (Asaas/Resend/Evolution) são **opcionais**: sem chaves, o Asaas
-  roda em `mock` (links fake) e e-mail/WhatsApp são apenas ignorados (sem erro).
+Projeto em produção, em uso pela Gestalize Systems.

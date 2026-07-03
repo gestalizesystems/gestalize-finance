@@ -2,45 +2,36 @@
 
 ## Visão geral
 
-O Gestalize Finance é um **monólito Next.js 14 (App Router)**. Não há backend
-separado: as telas são **Server Components** que leem o banco direto via Prisma,
-e as mutações usam **Server Actions** e alguns **Route Handlers** (API) para
-integrações externas (login, webhook, cron).
-
-```
-Navegador ──► Next.js (App Router)
-                ├─ Server Components ── Prisma ──► PostgreSQL
-                ├─ Server Actions ───── Prisma + libs de integração
-                └─ Route Handlers (/api) ── login | logout | cron | webhook
-                                              │
-                       Asaas · Resend · Evolution API (REST via fetch)
-```
-
-### Diagrama de arquitetura
+O Gestalize Finance é uma aplicação única em Next.js (App Router). Não há um
+backend separado: as telas são Server Components que leem os dados diretamente
+pela camada de acesso a dados, e as operações de escrita usam Server Actions.
+Apenas alguns endpoints existem para atender integrações externas e uma tarefa
+agendada.
 
 ```mermaid
 flowchart TD
-    User([Navegador]) --> MW["middleware.ts<br/>(exige sessão)"]
-    MW -->|sem sessão| Login["/login"]
-    MW -->|com sessão| Pages["Páginas<br/>(Server Components)"]
-    Pages --> Prisma[(Prisma)]
-    Pages -->|mutações| Actions["Server Actions<br/>(actions.ts)"]
-    Actions --> Prisma
-    Prisma --> DB[(PostgreSQL)]
+    User([Navegador]) --> MW["Middleware (exige sessão)"]
+    MW -->|sem sessão| Login["Tela de login"]
+    MW -->|com sessão| Pages["Páginas (Server Components)"]
+    Pages --> Data[(Camada de dados)]
+    Pages -->|mutações| Actions["Server Actions"]
+    Actions --> Data
+    Data --> DB[(PostgreSQL)]
 
-    subgraph API["Route Handlers /api"]
-      LoginAPI[login] --- LogoutAPI[logout]
-      Cron["cron/billing"] --- Webhook["webhooks/asaas"]
+    subgraph API["Endpoints"]
+      Auth["Autenticação"]
+      Scheduled["Tarefa agendada (cobrança)"]
+      Webhook["Webhook do gateway"]
     end
 
-    Cronjob(["cron-job.org"]) -->|Bearer CRON_SECRET| Cron
-    Cron --> Billing["lib/billing.ts"]
-    Billing --> Prisma
-    Actions --> Libs["lib: asaas · email · whatsapp"]
-    Billing --> Libs
-    Webhook --> Prisma
-    Libs --> Ext{{"Asaas · Resend · Evolution"}}
-    Ext -.webhook de pagamento.-> Webhook
+    Agendador(["Agendador externo"]) -->|token| Scheduled
+    Scheduled --> Billing["Motor de cobrança"]
+    Billing --> Data
+    Actions --> Integr["Integrações (pagamento, e-mail, mensageria)"]
+    Billing --> Integr
+    Webhook --> Data
+    Integr --> Ext{{"Serviços externos"}}
+    Ext -.confirmação de pagamento.-> Webhook
 ```
 
 ## Estrutura de pastas
@@ -48,228 +39,161 @@ flowchart TD
 ```
 src/
   app/
-    layout.tsx            # Layout raiz (metadados, AppShell)
-    page.tsx              # Dashboard
-    actions.ts            # Server Actions (criar/editar/baixar/billing/configs)
-    globals.css           # Estilos globais + tema Tailwind
-    manifest.ts           # PWA manifest
-    icon.png / apple-icon.png / opengraph-image.png ...  # ícones (convenção Next)
-
-    login/                # Tela de login (client component + login.css)
-    clientes/             # Lista + busca; clientes/[id] = detalhe/resumo
-    produtos/             # Catálogo de produtos/serviços
-    assinaturas/          # Planos recorrentes
-    cobrancas/            # Faturas, gerar cobrança, dar baixa, rodar motor
-    pagamentos/           # Histórico de pagamentos
-    receitas/             # Receitas por mês
-    despesas/             # Custos (saídas)
-    relatorios/           # Relatório por período
-    relatorios/documento/ # Versão "PDF" (impressão) do relatório
-    automacao/            # Régua de cobrança (visão)
-    mensagens/            # Templates de e-mail/WhatsApp
-    configuracoes/        # Dados da empresa + status das integrações
-
-    api/
-      login/route.ts            # POST – autentica (e-mail/senha + TOTP)
-      logout/route.ts           # GET  – encerra a sessão
-      cron/billing/route.ts     # GET  – motor de cobrança diário
-      webhooks/asaas/route.ts   # POST – baixa automática via Asaas
-
-  components/             # UI: Sidebar, AppShell, charts, forms, modais, etc.
-
-  lib/                    # Regras de negócio e integrações
-    prisma.ts             # Cliente Prisma (singleton)
-    auth.ts               # Sessão por cookie assinado (HMAC-SHA256)
-    totp.ts               # 2FA (TOTP, RFC 6238)
-    asaas.ts              # Gateway de pagamento (mock | sandbox | live)
-    billing.ts            # Motor de cobrança (gera faturas, atrasos, baixa)
-    email.ts              # Envio + template de e-mail (Resend)
-    whatsapp.ts           # Envio + template de WhatsApp (Evolution)
-    settings.ts           # Configurações key-value + templates
-    metrics.ts            # Agregações (receita, MRR/ARR, relatórios)
-    masks.ts              # Máscaras (telefone, CPF/CNPJ, data)
-    utils.ts              # Formatadores (R$, datas, variação)
-
-  middleware.ts           # Protege todas as rotas (exige sessão)
-
+    layout.tsx        Layout raiz e metadados
+    page.tsx          Painel principal
+    actions.ts        Server Actions (criação, edição, baixa, cobrança)
+    (rotas)/          Clientes, produtos, assinaturas, cobranças,
+                      pagamentos, receitas, despesas, relatórios,
+                      automação, mensagens, configurações, login
+    api/              Endpoints de autenticação, webhook e tarefa agendada
+  components/         Componentes de interface
+  lib/                Regras de negócio e integrações
+  middleware.ts       Proteção de rotas (exige sessão)
 prisma/
-  schema.prisma           # Modelo de dados
-  migrations/             # Histórico de migrações
-  seed.ts                 # Dados de exemplo
+  schema.prisma       Modelo de dados
+  migrations/         Histórico de migrações
+  seed.ts             Dados de exemplo
 ```
 
 ## Fluxo da aplicação
 
-1. O usuário acessa uma rota. O `middleware.ts` exige um cookie de sessão válido;
-   sem ele, redireciona para `/login`.
-2. A página (Server Component) lê o banco via Prisma e renderiza no servidor.
-3. Ações do usuário (criar cobrança, dar baixa, salvar config) chamam **Server
-   Actions** em `app/actions.ts`, que escrevem no banco e disparam integrações.
-4. Eventos externos (pagamento confirmado, cron diário) chegam pelos **Route
-   Handlers** em `app/api/*`.
+1. O usuário acessa uma rota. O middleware exige uma sessão válida; sem ela,
+   redireciona para a tela de login.
+2. A página (Server Component) lê os dados e é renderizada no servidor.
+3. Ações do usuário (criar cobrança, dar baixa, salvar configurações) chamam
+   Server Actions, que persistem os dados e disparam as integrações.
+4. Eventos externos (confirmação de pagamento, execução agendada) chegam pelos
+   endpoints da aplicação.
 
 ## Fluxo de autenticação
 
-Implementado **sem bibliotecas externas**, usando Web Crypto:
+A autenticação foi implementada com primitivas nativas de criptografia, sem
+bibliotecas de terceiros:
 
-1. `POST /api/login` recebe `email`, `senha` e (se 2FA ligado) `totp`.
-2. `checkCredentials()` compara com `AUTH_EMAIL` / `AUTH_PASSWORD`.
-3. Se `AUTH_TOTP_SECRET` existe, `verifyTotp()` valida o código de 6 dígitos
-   (TOTP, janela ±1 para tolerar relógio).
-4. `createSessionToken()` gera um token `payload.assinatura` (HMAC-SHA256 com
-   `AUTH_SECRET`) e grava no cookie **httpOnly** `gf_session` (validade 7 dias).
-5. O `middleware.ts` chama `verifySessionToken()` em cada requisição de página.
-6. `GET /api/logout` apaga o cookie e volta para `/login`.
-
-Detalhes do 2FA em [INTEGRACOES.md](INTEGRACOES.md) não se aplicam — veja
-`src/lib/totp.ts` e a tabela de `AUTH_TOTP_SECRET` em [VARIAVEIS.md](VARIAVEIS.md).
+1. O acesso é validado contra credenciais administrativas.
+2. Quando o segundo fator está habilitado, é exigido um código temporário (TOTP).
+3. Uma sessão assinada é emitida e guardada em cookie protegido (`httpOnly`).
+4. O middleware valida a sessão a cada requisição de página.
+5. O encerramento de sessão remove o cookie e retorna à tela de login.
 
 ## Fluxo das integrações
 
-- **Cobrança gerada** (manual ou pelo cron) → `asaas.createCharge()` cria a
-  cobrança no gateway e retorna `externalId` + `paymentLink`, salvos na fatura.
-- **Notificação** → `renderInvoiceEmail()`/`renderInvoiceWhatsApp()` montam a
-  mensagem a partir dos templates (Settings) e `sendEmail()`/`sendWhatsApp()`
-  enviam via Resend/Evolution.
-- **Pagamento confirmado** → o Asaas chama `POST /api/webhooks/asaas`, que dá
-  **baixa automática** (cria `Payment`, marca `Invoice` como `PAID`).
+Cada integração é isolada em seu próprio módulo e degrada com elegância: se não
+estiver configurada, é ignorada sem interromper o fluxo.
 
-Cada integração é isolada em seu módulo `lib/*` e **degrada com elegância**
-(se não configurada, é ignorada sem quebrar o fluxo).
+- Ao gerar uma cobrança, a aplicação solicita a criação da cobrança ao gateway
+  de pagamento e armazena a referência e o link de pagamento na fatura.
+- Em seguida, monta as mensagens a partir de modelos editáveis e as envia pelos
+  canais de e-mail e mensageria.
+- Quando o pagamento é confirmado, o gateway notifica a aplicação, que registra o
+  recebimento e baixa a fatura automaticamente.
 
 ```mermaid
 sequenceDiagram
-    participant Admin
+    participant Operador
     participant App as Gestalize Finance
-    participant Asaas
-    participant Canais as Resend / Evolution
+    participant Gateway
+    participant Canais as E-mail / Mensageria
     participant Cliente
 
-    Admin->>App: Cria cobrança (ou cron diário)
-    App->>Asaas: createCharge (POST /payments)
-    Asaas-->>App: externalId + paymentLink
-    App->>Canais: envia e-mail + WhatsApp (com link)
-    Canais-->>Cliente: cobrança com link de pagamento
-    Cliente->>Asaas: paga (Pix / boleto / cartão)
-    Asaas->>App: webhook PAYMENT_RECEIVED
-    App->>App: cria Payment + marca Invoice = PAID
+    Operador->>App: Cria cobrança (ou execução agendada)
+    App->>Gateway: Solicita cobrança
+    Gateway-->>App: Referência e link de pagamento
+    App->>Canais: Envia notificação com o link
+    Canais-->>Cliente: Cobrança com link de pagamento
+    Cliente->>Gateway: Efetua o pagamento
+    Gateway->>App: Notifica confirmação
+    App->>App: Registra pagamento e baixa a fatura
 ```
 
-## Banco de dados (visão geral)
+## Banco de dados
 
-PostgreSQL via Prisma. **7 tabelas** e 8 enums.
+Modelo relacional em PostgreSQL, com sete tabelas e enums de apoio.
 
 | Tabela | Função | Relacionamentos |
 |---|---|---|
-| `Client` | Clientes (nome, documento, contato, status) | 1—N `Subscription`, `Invoice`, `Cost` |
-| `Product` | Produtos/serviços (preço mensal + implantação, tipo, ativo) | 1—N `Subscription`, `Invoice`, `Cost` |
-| `Subscription` | Assinatura recorrente (valor, ciclo, próximo vencimento, status) | N—1 `Client`/`Product`; 1—N `Invoice` |
-| `Invoice` | Fatura (tipo, valor, vencimento, status, `externalId`, `paymentLink`) | N—1 `Client`/`Product`/`Subscription`; 1—N `Payment` |
-| `Payment` | Pagamento de uma fatura (valor, método, data) | N—1 `Invoice` |
-| `Cost` | Despesa/custo (categoria, valor, data) | N—1 `Client`/`Product` (opcional) |
-| `Setting` | Configuração key-value (dados da empresa + templates) | — |
-
-### Diagrama de entidades (ER)
+| Cliente | Dados cadastrais e situação | 1—N Assinatura, Fatura, Despesa |
+| Produto | Produtos e serviços (mensalidade e implantação) | 1—N Assinatura, Fatura, Despesa |
+| Assinatura | Plano recorrente (valor, ciclo, próximo vencimento) | N—1 Cliente/Produto; 1—N Fatura |
+| Fatura | Cobrança (tipo, valor, vencimento, situação, link) | N—1 Cliente/Produto/Assinatura; 1—N Pagamento |
+| Pagamento | Recebimento de uma fatura (valor, método, data) | N—1 Fatura |
+| Despesa | Custo (categoria, valor, data) | N—1 Cliente/Produto (opcional) |
+| Configuração | Parâmetros e modelos de mensagem (chave-valor) | — |
 
 ```mermaid
 erDiagram
-    Client ||--o{ Subscription : tem
-    Client ||--o{ Invoice : tem
-    Client ||--o{ Cost : "pode ter"
-    Product ||--o{ Subscription : usado_em
-    Product ||--o{ Invoice : usado_em
-    Product ||--o{ Cost : "pode ter"
-    Subscription ||--o{ Invoice : gera
-    Invoice ||--o{ Payment : recebe
+    Cliente ||--o{ Assinatura : possui
+    Cliente ||--o{ Fatura : possui
+    Cliente ||--o{ Despesa : "pode ter"
+    Produto ||--o{ Assinatura : compoe
+    Produto ||--o{ Fatura : compoe
+    Produto ||--o{ Despesa : "pode ter"
+    Assinatura ||--o{ Fatura : gera
+    Fatura ||--o{ Pagamento : recebe
 
-    Client {
+    Cliente {
       string id PK
-      string name
-      string document "CPF/CNPJ"
-      ClientStatus status
+      string nome
+      string documento
+      string situacao
     }
-    Product {
+    Produto {
       string id PK
-      string name
-      decimal defaultPrice "mensalidade"
-      decimal implementationPrice "implantação"
-      ProductType type
-      bool active
+      string nome
+      decimal precoMensalidade
+      decimal precoImplantacao
+      bool ativo
     }
-    Subscription {
+    Assinatura {
       string id PK
-      decimal amount
-      BillingCycle cycle
-      datetime nextDueDate
-      SubscriptionStatus status
+      decimal valor
+      string ciclo
+      datetime proximoVencimento
+      string situacao
     }
-    Invoice {
+    Fatura {
       string id PK
-      InvoiceType type
-      decimal amount
-      datetime dueDate
-      InvoiceStatus status
-      string externalId "id no Asaas"
-      string paymentLink
+      string tipo
+      decimal valor
+      datetime vencimento
+      string situacao
     }
-    Payment {
+    Pagamento {
       string id PK
-      decimal amount
-      PaymentMethod method
-      datetime paidAt
+      decimal valor
+      string metodo
+      datetime pagoEm
     }
-    Cost {
+    Despesa {
       string id PK
-      string description
-      decimal amount
-      CostCategory category
+      string descricao
+      decimal valor
+      string categoria
     }
-    Setting {
-      string key PK
-      string value
+    Configuracao {
+      string chave PK
+      string valor
     }
 ```
 
-### Enums
+### Regras de integridade
 
-`ClientStatus` (ACTIVE, DELINQUENT, INACTIVE) ·
-`ProductType` · `BillingCycle` (MONTHLY, YEARLY) ·
-`SubscriptionStatus` (ACTIVE, …) ·
-`InvoiceType` (IMPLEMENTATION, SUBSCRIPTION, EXTRA) ·
-`InvoiceStatus` (PENDING, PAID, OVERDUE, CANCELED) ·
-`PaymentMethod` (PIX, BOLETO, CARD, MANUAL) ·
-`CostCategory`.
-
-### Regras de integridade importantes
-
-- Apagar um `Client` faz **cascade** nas `Invoice` (e estas nos `Payment`).
-- `Cost.clientId`/`productId` usam **SetNull** (apagar produto/cliente não apaga a despesa).
-- A baixa por webhook é **idempotente** (não duplica `Payment` se a fatura já está `PAID`).
+- A exclusão de um cliente remove em cascata suas faturas e os pagamentos
+  associados.
+- Despesas mantêm o histórico mesmo quando o cliente ou produto vinculado é
+  removido.
+- A baixa por confirmação de pagamento é idempotente e não duplica registros.
 
 ### Migrações
 
-Histórico em `prisma/migrations/`:
+O histórico de migrações fica em `prisma/migrations/` e é aplicado
+automaticamente durante o deploy. Em desenvolvimento, novas migrações são
+geradas a partir de alterações no modelo de dados.
 
-| Migração | O que introduziu |
-|---|---|
-| `..._init` | Schema inicial (todas as tabelas principais) |
-| `..._product_implementation_price` | Campo de preço de implantação no `Product` |
-| `..._settings` | Tabela `Setting` (configurações + templates) |
+## Organização dos endpoints
 
-Aplicar em produção: `npx prisma migrate deploy` (roda automático no deploy do Railway).
-Criar nova migração em dev: `npx prisma migrate dev --name descricao`.
-
-## Organização das APIs
-
-Apenas 4 Route Handlers (o resto é Server Component/Action). Veja [API.md](API.md).
-
-| Rota | Método | Protege com |
-|---|---|---|
-| `/api/login` | POST | (público) credenciais + TOTP |
-| `/api/logout` | GET | cookie de sessão |
-| `/api/cron/billing` | GET | `CRON_SECRET` (Bearer) |
-| `/api/webhooks/asaas` | POST | `ASAAS_WEBHOOK_TOKEN` (header) |
-
-> O `middleware.ts` ignora `/api/*`, `/login`, `_next` e arquivos estáticos; a
-> proteção desses endpoints é feita por token próprio (cron/webhook) ou pelas
-> próprias credenciais (login).
+A aplicação expõe um número reduzido de endpoints, dedicados a autenticação, ao
+recebimento da confirmação de pagamento (webhook) e à execução da tarefa
+agendada de cobrança. Os endpoints sensíveis são protegidos por token. As demais
+telas não utilizam uma API REST: leem os dados no servidor e realizam as
+operações de escrita por Server Actions.

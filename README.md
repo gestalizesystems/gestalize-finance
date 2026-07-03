@@ -5,7 +5,7 @@
 <h1 align="center">Gestalize Finance</h1>
 
 <p align="center">
-  Financial Management & Recurring Billing Platform
+  Financial Operations Platform for Modern Businesses
 </p>
 
 <p align="center">
@@ -27,26 +27,23 @@
 
 ## Overview
 
-Gestalize Finance is the platform Gestalize Systems uses to manage the financial
-lifecycle of its client base. It consolidates revenue and cost tracking,
-recurring subscription management, and automated billing into a single system,
-replacing manual, spreadsheet-based processes.
+Gestalize Finance is a modern financial operations platform designed to help businesses manage customers, subscriptions, recurring billing, revenue and financial performance from a single application.
+
+The platform centralizes the entire billing lifecycle, automates recurring operations and provides real-time financial visibility through dashboards, reports and intelligent automation, reducing manual work while improving operational efficiency.
 
 ## Business Problem
 
-Businesses that sell software and services on a recurring basis accumulate
-operational overhead as their client base grows. Invoicing, payment collection,
-dunning, and reconciliation are often handled by hand across spreadsheets and
-disconnected tools. The result is slow, error-prone, and offers limited
-visibility into financial performance.
+Businesses that operate with recurring services often rely on disconnected spreadsheets, manual invoicing and fragmented financial tools.
+
+As customer volume grows, billing, payment tracking and financial reporting become increasingly time-consuming, reducing operational efficiency and increasing the risk of errors.
+
+Organizations need a centralized platform capable of automating financial operations while providing accurate, real-time visibility into business performance.
 
 ## Solution
 
-Gestalize Finance centralizes the billing lifecycle in one application. From a
-single record of clients, products, and subscriptions, it generates invoices on
-schedule, notifies customers, provides a payment link, and reconciles payments
-automatically. Revenue, costs, and financial indicators remain continuously up
-to date.
+Gestalize Finance centralizes customer management, subscriptions, billing, payments and financial reporting into a single platform.
+
+Recurring invoices are generated automatically, payment status is continuously synchronized and financial indicators remain up to date, allowing organizations to focus on growth instead of repetitive administrative tasks.
 
 ## Key Features
 
@@ -66,16 +63,9 @@ to date.
 
 ## Architecture Overview
 
-Gestalize Finance is a single web application built on a server-first
-architecture. Pages are rendered on the server, and write operations run through
-server actions, avoiding a separate client-facing API for internal use. A small
-set of endpoints supports external integrations and scheduled tasks.
+Gestalize Finance is built around a modular architecture that separates financial operations, business rules, reporting and integrations into independent components.
 
-A billing engine runs on a schedule to generate due invoices and update overdue
-records. Payments are reconciled automatically through webhook notifications from
-the payment provider. Integrations for payments, email, and messaging are
-consumed over REST and isolated behind dedicated modules, each degrading
-gracefully when a service is not configured.
+The platform automates recurring billing, payment processing and financial reporting while integrating seamlessly with external payment, email and messaging services. This modular design ensures scalability, maintainability and flexibility as business requirements evolve.
 
 ## Technology Stack
 

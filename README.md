@@ -87,8 +87,32 @@ prisma/          Data model and migrations
 
 ## Screenshots
 
-Screenshots of the dashboard, billing, and reporting views will be published
-here.
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="85%" />
+  <br />
+  <sub>Financial dashboard with revenue, recurring revenue, and billing automation.</sub>
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/product.png" alt="Catalog" />
+      <br />
+      <sub>Product and service catalog.</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/reporting.png" alt="Reports" />
+      <br />
+      <sub>Financial reports by period.</sub>
+    </td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/screenshots/expenses.png" alt="Expenses" width="70%" />
+  <br />
+  <sub>Expense tracking by category.</sub>
+</p>
 
 ## Future Improvements
 

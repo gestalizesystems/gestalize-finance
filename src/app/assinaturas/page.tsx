@@ -1,8 +1,9 @@
+import { Ban, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
-import { createSubscription } from "../actions";
+import { createSubscription, cancelSubscription, deleteSubscription } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,8 @@ export default async function AssinaturasPage({
               <th className="pb-3 pr-4 font-medium">Valor</th>
               <th className="pb-3 pr-4 font-medium">Ciclo</th>
               <th className="pb-3 pr-4 font-medium">Próx. vencimento</th>
-              <th className="pb-3 font-medium">Status</th>
+              <th className="pb-3 pr-4 font-medium">Status</th>
+              <th className="pb-3 font-medium text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink-700/40">
@@ -89,16 +91,41 @@ export default async function AssinaturasPage({
                 <td className="py-3.5 pr-4 font-semibold text-white">{formatCurrency(s.amount)}</td>
                 <td className="py-3.5 pr-4">{s.cycle === "YEARLY" ? "Anual" : "Mensal"}</td>
                 <td className="py-3.5 pr-4">{formatDate(s.nextDueDate)}</td>
-                <td className="py-3.5">
+                <td className="py-3.5 pr-4">
                   <span className={`badge ${subStatus[s.status]}`}>
                     {s.status === "ACTIVE" ? "Ativa" : s.status === "PAUSED" ? "Pausada" : "Cancelada"}
                   </span>
+                </td>
+                <td className="py-3.5">
+                  <div className="flex items-center justify-end gap-2">
+                    {s.status !== "CANCELED" && (
+                      <form action={cancelSubscription} className="inline-block">
+                        <input type="hidden" name="subscriptionId" value={s.id} />
+                        <button
+                          title="Cancelar assinatura (para as cobranças automáticas)"
+                          className="flex h-8 items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 text-xs font-medium text-slate-300 hover:bg-ink-800"
+                        >
+                          <Ban className="h-3.5 w-3.5" />
+                          Cancelar
+                        </button>
+                      </form>
+                    )}
+                    <form action={deleteSubscription} className="inline-block">
+                      <input type="hidden" name="subscriptionId" value={s.id} />
+                      <button
+                        title="Excluir assinatura"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-negative/15 text-negative hover:bg-negative/25"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             ))}
             {subs.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-500">Nenhuma assinatura cadastrada.</td>
+                <td colSpan={7} className="py-8 text-center text-slate-500">Nenhuma assinatura cadastrada.</td>
               </tr>
             )}
           </tbody>

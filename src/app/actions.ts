@@ -109,6 +109,24 @@ export async function createSubscription(formData: FormData) {
   revalidatePath("/assinaturas");
 }
 
+// Cancela a assinatura: para de gerar cobranças automáticas, mantém o registro.
+export async function cancelSubscription(formData: FormData) {
+  const id = String(formData.get("subscriptionId"));
+  await prisma.subscription.update({
+    where: { id },
+    data: { status: "CANCELED" },
+  });
+  revalidatePath("/assinaturas");
+}
+
+// Exclui a assinatura. As faturas já geradas são preservadas (desvinculadas).
+export async function deleteSubscription(formData: FormData) {
+  const id = String(formData.get("subscriptionId"));
+  await prisma.invoice.updateMany({ where: { subscriptionId: id }, data: { subscriptionId: null } });
+  await prisma.subscription.delete({ where: { id } });
+  revalidatePath("/assinaturas");
+}
+
 // Cria uma cobrança avulsa já com link de pagamento.
 // Tipo "COMBO" = Implantação + Mensalidade: cria DUAS faturas (cada uma com
 // seu tipo, p/ a receita ficar correta) mas UM único pagamento do total.

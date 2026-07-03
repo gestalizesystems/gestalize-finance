@@ -1,84 +1,90 @@
 # Gestalize Finance
 
-Sistema de gestão financeira e de cobranças desenvolvido para a Gestalize
-Systems. A plataforma centraliza o controle de receitas e despesas, administra
-assinaturas recorrentes e automatiza todo o ciclo de cobrança — da geração da
-fatura à confirmação do pagamento.
+Financial management and billing platform for recurring-revenue businesses.
 
-## Sobre o projeto
+## Overview
 
-O objetivo é substituir controles manuais (planilhas e conferências avulsas) por
-um fluxo único e automatizado. A partir do cadastro de clientes, produtos e
-assinaturas, o sistema gera as cobranças no vencimento, notifica o cliente,
-disponibiliza um link de pagamento e concilia o recebimento de forma automática,
-mantendo receitas, despesas e indicadores sempre atualizados.
+Gestalize Finance is the platform Gestalize Systems uses to manage the financial
+lifecycle of its client base. It consolidates revenue and cost tracking,
+recurring subscription management, and automated billing into a single system,
+replacing manual, spreadsheet-based processes.
 
-## Principais funcionalidades
+## Business Problem
 
-- Painel com indicadores financeiros (receita, receita recorrente, ticket médio,
-  inadimplência) e gráficos de evolução.
-- Cadastro de clientes com resumo e apuração de resultado por cliente.
-- Catálogo de produtos e serviços, com valores de mensalidade e de implantação.
-- Assinaturas recorrentes (mensais e anuais) com controle de vencimento.
-- Geração de cobranças, incluindo o modelo combinado de implantação e
-  mensalidade em um único pagamento.
-- Régua de cobrança automatizada, com aviso de vencimento e de atraso.
-- Conciliação automática do pagamento e baixa da fatura.
-- Relatórios por período e emissão de documento em PDF.
-- Modelos de mensagem editáveis para os canais de comunicação.
-- Acesso privado com autenticação e segundo fator (2FA) opcional.
-- Interface responsiva, adaptada para uso em computador, tablet e celular.
+Businesses that sell software and services on a recurring basis accumulate
+operational overhead as their client base grows. Invoicing, payment collection,
+dunning, and reconciliation are often handled by hand across spreadsheets and
+disconnected tools. The result is slow, error-prone, and offers limited
+visibility into financial performance.
 
-## Arquitetura e decisões técnicas
+## Solution
 
-O sistema foi construído como uma aplicação única em Next.js (App Router). As
-telas são renderizadas no servidor e as operações de escrita usam Server
-Actions, dispensando uma camada de API tradicional para o uso interno. Alguns
-poucos endpoints existem apenas para integrações externas e tarefas agendadas.
+Gestalize Finance centralizes the billing lifecycle in one application. From a
+single record of clients, products, and subscriptions, it generates invoices on
+schedule, notifies customers, provides a payment link, and reconciles payments
+automatically. Revenue, costs, and financial indicators remain continuously up
+to date.
 
-Decisões que orientaram a construção:
+## Key Features
 
-- Camada de dados com Prisma sobre PostgreSQL, com modelo de dados normalizado e
-  migrações versionadas.
-- Autenticação implementada com primitivas nativas de criptografia (sem
-  bibliotecas de terceiros), incluindo sessão assinada e segundo fator TOTP.
-- Integrações externas consumidas por REST, isoladas em módulos próprios e com
-  degradação graciosa — quando um serviço não está configurado, a funcionalidade
-  é simplesmente ignorada, sem afetar o restante do fluxo.
-- Motor de cobrança idempotente, projetado para ser executado por um agendador e
-  não duplicar faturas.
-- Conciliação de pagamentos por webhook, com suporte a cenários de pagamento,
-  atraso, cancelamento e estorno.
-- Entrega contínua: cada atualização na branch principal é publicada
-  automaticamente no ambiente de produção.
+- Financial dashboard with revenue, recurring revenue, average ticket, and
+  delinquency indicators.
+- Client management with per-client financial results.
+- Product and service catalog with subscription and implementation pricing.
+- Recurring subscriptions on monthly and annual cycles.
+- Invoice generation, including combined implementation and subscription charges
+  settled in a single payment.
+- Automated dunning with pre-due and overdue notifications.
+- Automatic payment reconciliation.
+- Reporting by period with PDF export.
+- Editable message templates for customer communication.
+- Private access with optional two-factor authentication.
+- Responsive interface for desktop, tablet, and mobile.
 
-A descrição detalhada da arquitetura, dos fluxos e do modelo de dados está em
-[docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+## Architecture Overview
 
-## Tecnologias
+Gestalize Finance is a single web application built on a server-first
+architecture. Pages are rendered on the server, and write operations run through
+server actions, avoiding a separate client-facing API for internal use. A small
+set of endpoints supports external integrations and scheduled tasks.
 
-- Next.js 14 (App Router, Server Components e Server Actions) com TypeScript
+A billing engine runs on a schedule to generate due invoices and update overdue
+records. Payments are reconciled automatically through webhook notifications from
+the payment provider. Integrations for payments, email, and messaging are
+consumed over REST and isolated behind dedicated modules, each degrading
+gracefully when a service is not configured.
+
+## Technology Stack
+
+- Next.js 14 (App Router, Server Components, Server Actions) with TypeScript
 - Tailwind CSS
-- PostgreSQL com Prisma ORM
-- Recharts (gráficos) e lucide-react (ícones)
-- Integrações de pagamento, e-mail e mensageria via REST
+- PostgreSQL with Prisma ORM
+- Recharts for data visualization
+- REST integrations for payment, email, and messaging providers
 
-## Estrutura do projeto
+## Project Structure
 
 ```
 src/
-  app/          Rotas: páginas, Server Actions e endpoints de integração
-  components/   Componentes de interface
-  lib/          Regras de negócio e integrações (dados, cobrança, notificações)
-prisma/         Modelo de dados e migrações
-docs/           Documentação técnica
+  app/          Application routes and server actions
+  components/    User interface components
+  lib/           Business logic and integrations
+prisma/          Data model and migrations
 ```
 
-## Documentação
+## Screenshots
 
-- [docs/ARQUITETURA.md](docs/ARQUITETURA.md) — arquitetura, fluxos e modelo de dados
-- [CHANGELOG.md](CHANGELOG.md) — histórico de versões
+Screenshots of the dashboard, billing, and reporting views will be published
+here.
 
-## Status
+## Future Improvements
 
-Projeto em produção, em uso pela Gestalize Systems.
+- Multi-user access with role-based permissions.
+- Additional payment methods and installment options.
+- Advanced reporting and data export.
+- Audit logging for financial operations.
+
+## License
+
+Gestalize Finance is proprietary software developed and maintained by Gestalize
+Systems. All rights reserved.

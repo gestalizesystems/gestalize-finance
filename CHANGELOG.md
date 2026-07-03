@@ -1,77 +1,77 @@
 # Changelog
 
-Registro das mudanças relevantes do Gestalize Finance. O formato é baseado em
-[Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versão atual: 0.1.0.
+Record of notable changes to Gestalize Finance. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Current version: 0.1.0.
 
 ---
 
 ## [0.1.0] — 2026-06-28
 
-Primeira versão completa, em produção, com o ciclo de cobrança de ponta a ponta.
+First complete release, in production, with the end-to-end billing cycle.
 
-### Adicionado
-- Documentação técnica do projeto.
-- Segundo fator de autenticação (TOTP) opcional no login.
-- Logo da empresa no cabeçalho do relatório em PDF.
-- Cobrança combinada de implantação e mensalidade em um único pagamento.
-- Relatórios com filtro por período e geração de documento em PDF.
-- Modelos de mensagem editáveis para os canais de comunicação.
-- Tela de configurações da empresa e situação das integrações.
-- Visão da régua de cobrança automatizada.
-- Exclusão de cobranças e despesas.
-- Filtro de meses baseado no histórico real de movimentações.
-- Interface responsiva, com navegação adaptada para dispositivos móveis.
+### Added
+- Project documentation.
+- Optional two-factor authentication (TOTP) at login.
+- Company logo in the PDF report header.
+- Combined implementation and subscription charge settled in a single payment.
+- Reporting by period with PDF export.
+- Editable message templates for customer communication.
+- Company settings and integration status screen.
+- Automated dunning overview.
+- Deletion of invoices and expenses.
+- Month filter based on real transaction history.
+- Responsive interface with navigation adapted for mobile devices.
 
-### Alterado
-- Padronização do ícone da aplicação e ajustes visuais do painel.
-- Confirmação visual ao salvar configurações.
+### Changed
+- Standardized application icon and dashboard visual adjustments.
+- Visual confirmation when saving settings.
 
-### Corrigido
-- Ajustes no fluxo de cobrança para garantir a geração correta do link de
-  pagamento e o tratamento de vencimentos.
-- Conciliação por webhook ampliada para tratar pagamento, vencimento,
-  cancelamento e estorno.
+### Fixed
+- Billing flow adjustments to ensure correct payment-link generation and due-date
+  handling.
+- Extended webhook reconciliation to handle payment, overdue, cancellation, and
+  refund events.
 
-### Removido
-- Código e recursos sem uso, além de uma dependência não utilizada (limpeza sem
-  mudança de comportamento).
-- Dados de teste do ambiente de produção.
+### Removed
+- Unused code and assets, and an unused dependency (cleanup with no behavior
+  change).
+- Test data from the production environment.
 
 ---
 
 ## [0.0.2] — 2026-06-27
 
-Integrações externas e publicação em produção.
+External integrations and production release.
 
-### Adicionado
-- Conciliação automática de pagamentos por webhook.
-- Integração de e-mail para envio de cobranças.
-- Integração de mensageria para envio de cobranças.
-- Acesso privado com sessão autenticada e preparação para produção.
-- Identidade visual da marca.
+### Added
+- Automatic payment reconciliation via webhook.
+- Email integration for sending invoices.
+- Messaging integration for sending invoices.
+- Private access with authenticated sessions and production readiness.
+- Brand identity.
 
-### Alterado
-- Substituição do provedor de mensageria por uma solução self-hosted, reduzindo
-  custo operacional.
+### Changed
+- Replaced the messaging provider with a self-hosted solution, reducing
+  operational cost.
 
-### Corrigido
-- Ajustes de compatibilidade e de encerramento de sessão no ambiente de produção.
+### Fixed
+- Compatibility and session-handling adjustments in the production environment.
 
 ---
 
 ## [0.0.1] — 2026-06-26
 
-Versão inicial (MVP) e identidade visual.
+Initial release (MVP) and brand identity.
 
-### Adicionado
-- Painel, motor de cobrança e cadastros de clientes, produtos, assinaturas,
-  cobranças e despesas.
-- Paginação e apuração de resultado por cliente.
+### Added
+- Dashboard, billing engine, and management of clients, products, subscriptions,
+  invoices, and expenses.
+- Pagination and per-client financial results.
 
 ---
 
-## Manutenção deste arquivo
+## Maintaining this file
 
-A cada conjunto de mudanças relevante, registre um item na seção correspondente
-(Adicionado, Alterado, Corrigido ou Removido). Ao publicar uma nova versão
-estável, promova a seção de trabalho para a nova versão com a respectiva data.
+For each meaningful set of changes, record an entry under the appropriate section
+(Added, Changed, Fixed, or Removed). When publishing a new stable version,
+promote the working section to that version with its release date.

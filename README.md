@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://bots.gestalizesystems.com.br/">Website</a> •
+  <a href="https://finance.gestalizesystems.com.br/">Website</a> •
   <a href="https://instagram.com/gestalizesystems">Instagram</a>
 </p>
 

@@ -22,7 +22,7 @@ export default function LoginPage() {
     // ----- Pontinhos -----
     if (canvas) {
       const ctx = canvas.getContext("2d")!;
-      const COR = "#c4d2ec", RAIO = 1.6, ALCANCE = 150, FORCA = 6, MOLA = 0.012, ATRITO = 0.88;
+      const COR = "#8aa0c6", RAIO = 1.6, ALCANCE = 150, FORCA = 6, MOLA = 0.012, ATRITO = 0.88;
       let dots: { hx: number; hy: number; x: number; y: number; vx: number; vy: number; a: number }[] = [];
       let mx = -9999, my = -9999;
       const COLS = 26, ROWS = 15, ESP = 11;

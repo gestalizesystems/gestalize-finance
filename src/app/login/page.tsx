@@ -115,7 +115,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email: email.trim(), senha, totp: totp.trim() }),
       });
       const j = await r.json();
-      if (j.ok) { window.location.href = "/"; return; }
+      if (j.ok) { window.location.href = "/dashboard"; return; }
       if (j.needsTotp) {
         setShowTotp(true);
         setErroAzul(true);

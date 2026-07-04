@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 
 const nav = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clientes", label: "Clientes", icon: Users },
   { href: "/cobrancas", label: "Cobranças", icon: Receipt },
   { href: "/assinaturas", label: "Assinaturas", icon: RefreshCw },
@@ -57,10 +57,7 @@ export function Sidebar({
       {/* Navegação */}
       <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
         {nav.map((item) => {
-          const active =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
+          const active = pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link

@@ -19,35 +19,21 @@ export default function LoginPage() {
     const svg = document.getElementById("waveSvg");
     let raf = 0;
 
-    // ----- Pontinhos -----
+    // ----- Pontinhos (grade na tela toda; discretos em repouso, acendem/afastam perto do cursor) -----
     if (canvas) {
       const ctx = canvas.getContext("2d")!;
-      const COR = "#8aa0c6", RAIO = 1.6, ALCANCE = 150, FORCA = 6, MOLA = 0.012, ATRITO = 0.88;
-      let dots: { hx: number; hy: number; x: number; y: number; vx: number; vy: number; a: number }[] = [];
+      const ESP = 30, RAIO = 1.5, ALCANCE = 180;
+      const A_BASE = 0.05, A_ATIVO = 0.7;
+      const FORCA = 3.2, MOLA = 0.02, ATRITO = 0.86;
+      let dots: { hx: number; hy: number; x: number; y: number; vx: number; vy: number }[] = [];
       let mx = -9999, my = -9999;
-      const COLS = 26, ROWS = 15, ESP = 11;
 
-      const grade = (ox: number, oy: number) => {
-        const cx = (COLS - 1) / 2, cy = (ROWS - 1) / 2;
-        for (let c = 0; c < COLS; c++)
-          for (let r = 0; r < ROWS; r++) {
-            const x = ox + c * ESP, y = oy + r * ESP;
-            const nx = cx ? (c - cx) / cx : 0, ny = cy ? (r - cy) / cy : 0;
-            const t = Math.min(1, Math.hypot(nx, ny));
-            dots.push({ hx: x, hy: y, x, y, vx: 0, vy: 0, a: 1 - t * 0.72 });
-          }
-      };
       const gerar = () => {
         dots = [];
-        const W = innerWidth, H = innerHeight, gw = COLS * ESP, gh = ROWS * ESP;
-        grade(42, 40);
-        grade(42, H - gh - 130);
-        grade(W - gw - 40, H - gh - 40);
-        const wm = document.querySelector(".wordmark");
-        if (wm) {
-          const r = wm.getBoundingClientRect();
-          if (r.width > 0) grade(r.right + 26, r.top + r.height / 2 - gh / 2);
-        }
+        const W = innerWidth, H = innerHeight;
+        for (let x = ESP; x < W; x += ESP)
+          for (let y = ESP; y < H; y += ESP)
+            dots.push({ hx: x, hy: y, x, y, vx: 0, vy: 0 });
       };
       const dimensoes = () => {
         const dpr = window.devicePixelRatio || 1;
@@ -63,16 +49,15 @@ export default function LoginPage() {
 
       const loop = () => {
         ctx.clearRect(0, 0, innerWidth, innerHeight);
-        ctx.fillStyle = COR;
         for (const d of dots) {
           const dx = d.x - mx, dy = d.y - my, dist = Math.hypot(dx, dy) || 0.01;
-          if (dist < ALCANCE) {
-            const f = (1 - dist / ALCANCE) * FORCA;
-            d.vx += (dx / dist) * f; d.vy += (dy / dist) * f;
-          }
+          const prox = dist < ALCANCE ? 1 - dist / ALCANCE : 0;
+          if (prox > 0) { const f = prox * FORCA; d.vx += (dx / dist) * f; d.vy += (dy / dist) * f; }
           d.vx += (d.hx - d.x) * MOLA; d.vy += (d.hy - d.y) * MOLA;
           d.vx *= ATRITO; d.vy *= ATRITO; d.x += d.vx; d.y += d.vy;
-          ctx.globalAlpha = d.a;
+          const p = prox * prox; // realce concentrado bem perto do cursor
+          ctx.globalAlpha = A_BASE + (A_ATIVO - A_BASE) * p;
+          ctx.fillStyle = p > 0.03 ? "#6f9bf2" : "#8aa0c6";
           ctx.beginPath(); ctx.arc(d.x, d.y, RAIO, 0, Math.PI * 2); ctx.fill();
         }
         ctx.globalAlpha = 1;

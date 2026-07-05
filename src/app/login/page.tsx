@@ -159,31 +159,38 @@ export default function LoginPage() {
             <div className="wordmark"><span className="g">Gestalize</span><span className="b">Finance</span></div>
           </div>
 
-          <h2>Plataforma completa para a <b>gestão financeira</b> da sua empresa</h2>
-          <p className="desc">Controle receitas, despesas, cobranças e o lucro de cada cliente — tudo em um só lugar.</p>
+          <h2>Centralize toda a operação<br />financeira do seu negócio</h2>
+          <p className="desc">Automatize cobranças, acompanhe sua receita em tempo real e cresça com visibilidade total.</p>
 
-          <ul className="features">
+          {/* Prévia do produto — herói visual */}
+          <div className="preview">
+            <div className="preview-bar"><i /><i /><i /></div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/shots/dashboard.png" alt="Painel do Gestalize Finance" />
+          </div>
+
+          <ul className="benefits">
             <li>
-              <span className="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg></span>
-              Receitas e despesas controladas
+              <span className="bic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg></span>
+              Cobrança recorrente automatizada
             </li>
             <li>
-              <span className="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z" /></svg></span>
-              Cobranças automáticas (Pix/boleto)
+              <span className="bic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg></span>
+              Visão financeira em tempo real
             </li>
             <li>
-              <span className="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg></span>
-              Relatórios, MRR e faturamento
+              <span className="bic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /></svg></span>
+              Clientes e assinaturas
             </li>
             <li>
-              <span className="fic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7L12 3z" /></svg></span>
-              Lucro por cliente
+              <span className="bic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg></span>
+              Crescimento da receita
             </li>
           </ul>
 
           <div className="seg">
-            <span className="sic"><svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 14-4-4 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6z" /></svg></span>
-            <div><strong>Segurança e confiabilidade</strong><small>Seus dados protegidos com login privado.</small></div>
+            <span className="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 14-4-4 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6z" /></svg></span>
+            <div><strong>Segurança de nível empresarial</strong><small>Dados financeiros protegidos e criptografados.</small></div>
           </div>
         </div>
 
@@ -196,7 +203,7 @@ export default function LoginPage() {
           </div>
 
           <div className="auth-card">
-            <div className="escudo"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 14-4-4 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6z" /></svg></div>
+            <div className="escudo"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 14-4-4 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6z" /></svg></div>
             <h2>Bem-vindo de volta!</h2>
             <p className="sub">Acesse sua conta para continuar</p>
 

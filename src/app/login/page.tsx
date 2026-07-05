@@ -156,17 +156,24 @@ export default function LoginPage() {
           <div className="marca">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/gestalize-bot.png" alt="Gestalize Finance" className="robo" />
-            <div className="wordmark"><span className="g">Gestalize</span><span className="b">Finance</span></div>
+            <div className="wordmark"><span className="g">Gestalize</span> <span className="b">Finance</span></div>
           </div>
 
-          <h2>Centralize toda a operação<br />financeira do seu negócio</h2>
-          <p className="desc">Automatize cobranças, acompanhe sua receita em tempo real e cresça com visibilidade total.</p>
+          <h2>Centralize toda a<br /><span className="hl">operação financeira</span><br />da sua empresa</h2>
+          <p className="desc">Automatize cobranças, acompanhe sua receita em tempo real e cresça com total visibilidade — em uma só plataforma.</p>
 
           {/* Prévia do produto — herói visual */}
           <div className="preview">
-            <div className="preview-bar"><i /><i /><i /></div>
+            <div className="preview-bar">
+              <i /><i /><i />
+              <span className="preview-url">finance.gestalizesystems.com/dashboard</span>
+            </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/shots/dashboard.png" alt="Painel do Gestalize Finance" />
+            <div className="preview-badge">
+              <span className="pb-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg></span>
+              <div><strong>Pagamento conciliado</strong><small>baixa automática</small></div>
+            </div>
           </div>
 
           <ul className="benefits">

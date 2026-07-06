@@ -31,23 +31,24 @@
 .auth .deco-blob1, .auth .deco-blob2, .auth .deco-blob3, .auth .deco-wave, .auth .deco-veil { display: none; }
 
 /* ===== Layout ===== */
-.auth .wrap { position: relative; z-index: 1; max-width: 1220px; margin: 0 auto; min-height: 100vh;
-  display: grid; grid-template-columns: 1.08fr 0.92fr; align-items: center; gap: 72px; padding: 60px 52px 64px; }
+.auth .wrap { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; min-height: 100vh;
+  display: grid; grid-template-columns: minmax(0, 470px) minmax(0, 420px); justify-content: center;
+  align-items: center; gap: 72px; padding: 28px 40px; }
 
 /* ===== Esquerda — marca + produto ===== */
 .auth .esq { display: flex; flex-direction: column; }
-.auth .marca { display: flex; align-items: center; gap: 14px; margin-bottom: 30px; }
-.auth .robo { width: 52px; height: 52px; object-fit: contain; flex: 0 0 auto; }
+.auth .marca { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
+.auth .robo { width: 48px; height: 48px; object-fit: contain; flex: 0 0 auto; }
 .auth .wordmark { line-height: 1.0; }
-.auth .wordmark .g { font-size: 28px; font-weight: 800; color: var(--escuro); letter-spacing: -0.8px; }
-.auth .wordmark .b { font-size: 28px; font-weight: 800; color: var(--azul-medio); letter-spacing: -0.8px; }
-.auth .esq h2 { font-size: 42px; line-height: 1.14; margin: 0 0 20px; color: var(--escuro); font-weight: 800; letter-spacing: -1.4px; }
+.auth .wordmark .g { font-size: 27px; font-weight: 800; color: var(--escuro); letter-spacing: -0.8px; }
+.auth .wordmark .b { font-size: 27px; font-weight: 800; color: var(--azul-medio); letter-spacing: -0.8px; }
+.auth .esq h2 { font-size: 34px; line-height: 1.16; margin: 0 0 15px; color: var(--escuro); font-weight: 800; letter-spacing: -1px; }
 .auth .esq h2 .hl { color: var(--azul-medio); }
-.auth .esq .desc { color: var(--suave); font-size: 16.5px; margin: 0 0 34px; line-height: 1.62; max-width: 480px; }
+.auth .esq .desc { color: var(--suave); font-size: 15px; margin: 0 0 24px; line-height: 1.55; }
 
 /* Prévia do produto (herói visual) */
 .auth .preview { position: relative; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 16px;
-  overflow: hidden; background: #0b1120; box-shadow: 0 34px 74px rgba(0, 0, 0, 0.58); margin: 0 0 34px; }
+  overflow: hidden; background: #0b1120; box-shadow: 0 30px 66px rgba(0, 0, 0, 0.58); margin: 0 0 24px; }
 .auth .preview::after { content: ""; position: absolute; inset: 0 0 -38px; z-index: -1;
   background: radial-gradient(ellipse 72% 62% at 50% 56%, rgba(37, 99, 235, 0.30), transparent 72%); filter: blur(28px); }
 .auth .preview-bar { display: flex; align-items: center; gap: 7px; padding: 11px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: rgba(255, 255, 255, 0.018); }
@@ -64,20 +65,11 @@
 .auth .preview-badge small { font-size: 12px; color: #94a4bf; }
 
 /* Benefícios de negócio */
-.auth .benefits { list-style: none; padding: 0; margin: 0 0 34px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
-.auth .benefits li { display: flex; align-items: center; gap: 14px; font-size: 15px; font-weight: 500; color: #c6d1e6; line-height: 1.35; }
-.auth .bic { width: 44px; height: 44px; border-radius: 13px; background: var(--azul-claro); color: var(--azul-medio);
+.auth .benefits { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+.auth .benefits li { display: flex; align-items: center; gap: 13px; font-size: 14.5px; font-weight: 500; color: #c6d1e6; line-height: 1.32; }
+.auth .bic { width: 42px; height: 42px; border-radius: 12px; background: var(--azul-claro); color: var(--azul-medio);
   display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-.auth .bic svg { width: 20px; height: 20px; }
-
-/* Selo de segurança (nível empresarial) */
-.auth .seg { display: flex; align-items: center; gap: 14px; margin-top: auto; padding-top: 4px; }
-.auth .seg .sic { width: 48px; height: 48px; border-radius: 13px; background: var(--azul-claro);
-  border: 1px solid rgba(37, 99, 235, 0.28); color: var(--azul-medio);
-  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-.auth .seg .sic svg { width: 24px; height: 24px; }
-.auth .seg strong { color: var(--escuro); font-size: 15px; display: block; font-weight: 600; }
-.auth .seg small { font-size: 13px; color: var(--suave); }
+.auth .bic svg { width: 19px; height: 19px; }
 
 /* ===== Direita — card ===== */
 .auth .col-dir { display: flex; flex-direction: column; position: relative; }
@@ -145,18 +137,17 @@
 /* ===== Animações de entrada (micro-interações premium) ===== */
 @keyframes authUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes escudoIn { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
-.auth .marca, .auth .esq h2, .auth .esq .desc, .auth .preview, .auth .benefits, .auth .seg,
+.auth .marca, .auth .esq h2, .auth .esq .desc, .auth .preview, .auth .benefits,
 .auth .auth-card, .auth .marca-mob { animation: authUp 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 .auth .esq h2 { animation-delay: 0.06s; }
 .auth .esq .desc { animation-delay: 0.11s; }
 .auth .preview { animation-delay: 0.16s; }
 .auth .benefits { animation-delay: 0.22s; }
-.auth .seg { animation-delay: 0.28s; }
 .auth .auth-card { animation-delay: 0.12s; }
 .auth .escudo { animation: escudoIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: 0.26s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth .marca, .auth .esq h2, .auth .esq .desc, .auth .preview, .auth .benefits, .auth .seg,
+  .auth .marca, .auth .esq h2, .auth .esq .desc, .auth .preview, .auth .benefits,
   .auth .auth-card, .auth .marca-mob, .auth .escudo { animation: none; }
   .auth .btn-entrar, .auth .campo, .auth .btn-entrar .seta { transition: none; }
 }

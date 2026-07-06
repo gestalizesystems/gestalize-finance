@@ -160,7 +160,7 @@ export default function LoginPage() {
           </div>
 
           <h2>Centralize toda a<br /><span className="hl">operação financeira</span><br />da sua empresa</h2>
-          <p className="desc">Automatize cobranças, acompanhe sua receita em tempo real e cresça com total visibilidade — em uma só plataforma.</p>
+          <p className="desc">Automatize cobranças, acompanhe sua receita em tempo real e cresça com total visibilidade.</p>
 
           {/* Prévia do produto — herói visual */}
           <div className="preview">
@@ -194,11 +194,6 @@ export default function LoginPage() {
               Crescimento da receita
             </li>
           </ul>
-
-          <div className="seg">
-            <span className="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 14-4-4 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6z" /></svg></span>
-            <div><strong>Segurança de nível empresarial</strong><small>Dados financeiros protegidos e criptografados.</small></div>
-          </div>
         </div>
 
         {/* Direita — card */}

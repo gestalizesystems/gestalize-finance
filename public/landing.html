@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Gestalize Finance — Plataforma de Operações Financeiras</title>
 <link rel="icon" type="image/png" href="/gestalize-bot.png" />
 <meta name="description" content="Gestalize Finance é a plataforma de operações financeiras para empresas modernas. Gerencie clientes, assinaturas e cobrança recorrente, automatize a régua de cobrança e tenha visibilidade financeira em tempo real." />
@@ -40,6 +40,7 @@
     line-height: 1.6;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    touch-action: pan-y;
   }
   a { text-decoration: none; color: inherit; }
   .container { max-width: 1140px; margin: 0 auto; padding: 0 6%; }
@@ -206,11 +207,15 @@
     .feat-grid { grid-template-columns: 1fr 1fr; }
     .aud-grid { grid-template-columns: 1fr 1fr; }
     .problem-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    /* No mobile o topo mostra "Entrar" (a demo já aparece no hero). */
+    .nav-right .btn-primary { display: none; }
+    .nav-signin { display: inline-flex; align-items: center; background: var(--blue); color: #fff;
+      font-weight: 600; padding: 0.6rem 1.35rem; border-radius: 9px; }
+    .nav-signin:hover { background: var(--blue-lt); color: #fff; }
   }
   @media (max-width: 620px) {
     .hero { padding: 8.5rem 0 3rem; }
     .feat-grid, .aud-grid, .pain-list, .preview-row { grid-template-columns: 1fr; }
-    .nav-signin { display: none; }
   }
 </style>
 </head>
@@ -415,6 +420,11 @@
 </footer>
 
 <script>
+  // Bloqueia zoom por gesto (pinça) — o iOS ignora user-scalable=no, então prevenimos aqui.
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
+  );
+
   // Grade de pontos interativa e discreta (escondida em repouso, acende perto do cursor).
   (function () {
     const canvas = document.getElementById("bgDots");

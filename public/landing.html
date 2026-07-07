@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Gestalize Finance — Plataforma de Operações Financeiras</title>
 <link rel="icon" type="image/png" href="/gestalize-bot.png" />
 <meta name="description" content="Gestalize Finance é a plataforma de operações financeiras para empresas modernas. Gerencie clientes, assinaturas e cobrança recorrente, automatize a régua de cobrança e tenha visibilidade financeira em tempo real." />
@@ -77,6 +77,8 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: rgba(7,9,15,0.72); backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
+    /* respeita a barra de status / notch (safe-area) para não sobrepor */
+    padding-top: env(safe-area-inset-top, 0px);
   }
   .nav-inner { max-width: 1140px; margin: 0 auto; padding: 0.85rem 6%;
     display: flex; align-items: center; justify-content: space-between; }
@@ -187,7 +189,7 @@
   .cta-actions { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
 
   /* ── Footer ── */
-  footer { border-top: 1px solid var(--border); padding: 2.5rem 0; }
+  footer { border-top: 1px solid var(--border); padding: 2.5rem 0 calc(2.5rem + env(safe-area-inset-bottom, 0px)); }
   .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
   .footer-logo { display: flex; align-items: center; gap: 8px; }
   .footer-logo img { width: 26px; height: 26px; object-fit: contain; }

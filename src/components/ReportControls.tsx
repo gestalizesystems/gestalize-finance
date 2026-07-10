@@ -18,16 +18,16 @@ export function DateRangeFilter({ start, end }: { start: string; end: string }) 
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-2">
-      <div>
-        <label className="mb-1 block text-xs text-slate-400">Início</label>
+    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
+      <label className="min-w-0 flex-1 sm:flex-none">
+        <span className="mb-1 block text-xs text-slate-400">Início</span>
         <input type="date" value={s} max={e} onChange={(ev) => setS(ev.target.value)} className="input py-2" />
-      </div>
-      <div>
-        <label className="mb-1 block text-xs text-slate-400">Fim</label>
+      </label>
+      <label className="min-w-0 flex-1 sm:flex-none">
+        <span className="mb-1 block text-xs text-slate-400">Fim</span>
         <input type="date" value={e} min={s} onChange={(ev) => setE(ev.target.value)} className="input py-2" />
-      </div>
-      <button onClick={apply} className="btn-ghost">Aplicar</button>
+      </label>
+      <button onClick={apply} className="btn-ghost w-full justify-center sm:w-auto">Aplicar</button>
     </div>
   );
 }

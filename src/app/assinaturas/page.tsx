@@ -46,7 +46,7 @@ export default async function AssinaturasPage({
       />
 
       <form action={createSubscription} className="card space-y-3">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 overflow-hidden sm:grid-cols-2 lg:grid-cols-3">
           <select name="clientId" required className="input">
             <option value="">Cliente</option>
             {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}

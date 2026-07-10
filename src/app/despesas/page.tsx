@@ -48,7 +48,7 @@ export default async function DespesasPage({
       <PageHeader title="Despesas" subtitle="Custos por sistema, ferramentas, servidores e fixos." />
 
       <form action={createCost} className="card space-y-3">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 overflow-hidden sm:grid-cols-2 lg:grid-cols-3">
           <input name="description" required placeholder="Descrição do custo" className="input" />
           <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
           <select name="category" required defaultValue="" className="input">

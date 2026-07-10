@@ -35,6 +35,7 @@ export function NotificationsBell({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
@@ -50,6 +51,20 @@ export function NotificationsBell({
       document.removeEventListener("keydown", onEsc);
     };
   }, []);
+
+  // Corrige o dropdown se ele ultrapassar as bordas da tela
+  useEffect(() => {
+    if (!open || !dropRef.current) return;
+    const el = dropRef.current;
+    el.style.transform = "";
+    const rect = el.getBoundingClientRect();
+    const vw = window.innerWidth;
+    if (rect.left < 8) {
+      el.style.transform = `translateX(${8 - rect.left}px)`;
+    } else if (rect.right > vw - 8) {
+      el.style.transform = `translateX(${vw - 8 - rect.right}px)`;
+    }
+  }, [open]);
 
   return (
     <div className="relative" ref={ref}>
@@ -68,7 +83,7 @@ export function NotificationsBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-ink-700 bg-ink-900 shadow-2xl">
+        <div ref={dropRef} className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-ink-700 bg-ink-900 shadow-2xl">
           <div className="flex items-center justify-between border-b border-ink-700/60 px-4 py-3">
             <span className="text-sm font-semibold text-white">Notificações</span>
             {count > 0 && <span className="text-xs text-slate-400">{count} em aberto</span>}

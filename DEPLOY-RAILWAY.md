@@ -65,6 +65,33 @@ Entre com `AUTH_EMAIL` / `AUTH_PASSWORD`. Só você tem acesso. ✅
 
 ---
 
+## 7. Cron diário (motor de cobrança automático)
+
+Gera as mensalidades e marca atrasos todo dia, sem clique.
+
+1. Nas **Variables** do app, adicione `CRON_SECRET` (uma string aleatória).
+2. No projeto Railway: **New → Cron Job** (ou um serviço com schedule).
+   - **Schedule:** `0 9 * * *` (todo dia às 9h, por exemplo).
+   - **Comando:**
+     ```
+     curl -sf -H "Authorization: Bearer $CRON_SECRET" https://finance.gestalizesystems.com.br/api/cron/billing
+     ```
+   - Use a mesma `CRON_SECRET` do app.
+
+O endpoint só executa se o header `Authorization: Bearer <CRON_SECRET>` bater.
+
+## 8. Webhook do Asaas (confirmação automática de pagamento)
+
+Quando o cliente paga, a fatura dá baixa sozinha.
+
+1. (Opcional) Adicione `ASAAS_WEBHOOK_TOKEN` nas Variables (um token seu).
+2. No painel do **Asaas** → Integrações → Webhooks:
+   - **URL:** `https://finance.gestalizesystems.com.br/api/webhooks/asaas`
+   - **Token de autenticação:** o mesmo de `ASAAS_WEBHOOK_TOKEN` (se usou).
+   - Eventos: pagamento **recebido/confirmado**.
+
+---
+
 ### Observações
 - **Custo:** plano Hobby do Railway (~US$ 5/mês, inclui uso) cobre um app
   pequeno + Postgres pequeno.

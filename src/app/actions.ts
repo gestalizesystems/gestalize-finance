@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createCharge } from "@/lib/asaas";
+import { sendEmail, renderInvoiceEmail } from "@/lib/email";
+import { sendWhatsApp, renderInvoiceWhatsApp } from "@/lib/whatsapp";
 import { toNumber } from "@/lib/utils";
 import {
   generateDueInvoices,
@@ -145,6 +147,46 @@ export async function createInvoice(formData: FormData) {
 
   revalidatePath("/cobrancas");
   revalidatePath("/");
+}
+
+// Envia (ou reenvia) o e-mail de cobrança de uma fatura.
+export async function sendInvoiceEmail(formData: FormData) {
+  const id = String(formData.get("invoiceId"));
+  const invoice = await prisma.invoice.findUnique({
+    where: { id },
+    include: { client: true },
+  });
+  if (!invoice || !invoice.client.email) return;
+
+  const { subject, html } = renderInvoiceEmail({
+    clientName: invoice.client.name,
+    description: invoice.description,
+    amount: invoice.amount,
+    dueDate: invoice.dueDate,
+    paymentLink: invoice.paymentLink,
+  });
+  await sendEmail({ to: invoice.client.email, subject, html });
+  revalidatePath("/cobrancas");
+}
+
+// Envia (ou reenvia) a cobrança por WhatsApp.
+export async function sendInvoiceWhatsApp(formData: FormData) {
+  const id = String(formData.get("invoiceId"));
+  const invoice = await prisma.invoice.findUnique({
+    where: { id },
+    include: { client: true },
+  });
+  if (!invoice || !invoice.client.phone) return;
+
+  const message = renderInvoiceWhatsApp({
+    clientName: invoice.client.name,
+    description: invoice.description,
+    amount: invoice.amount,
+    dueDate: invoice.dueDate,
+    paymentLink: invoice.paymentLink,
+  });
+  await sendWhatsApp({ phone: invoice.client.phone, message });
+  revalidatePath("/cobrancas");
 }
 
 export async function markPaid(formData: FormData) {

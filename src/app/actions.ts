@@ -12,8 +12,6 @@ import {
   generateDueInvoices,
   markOverdueInvoices,
   registerPayment,
-  advanceDueDate,
-  withDueDay,
 } from "@/lib/billing";
 import type { BillingCycle, CostCategory, ProductType, InvoiceType } from "@prisma/client";
 
@@ -70,6 +68,7 @@ export async function deleteProduct(formData: FormData) {
 }
 
 export async function createCost(formData: FormData) {
+  const dateRaw = String(formData.get("date") || "");
   await prisma.cost.create({
     data: {
       description: String(formData.get("description") || "").trim(),
@@ -77,6 +76,8 @@ export async function createCost(formData: FormData) {
       category: (formData.get("category") as CostCategory) || "OTHER",
       recurring: formData.get("recurring") === "on",
       clientId: (formData.get("clientId") as string) || null,
+      // Data escolhida (meio-dia p/ evitar deslize de fuso); vazio = hoje (default).
+      ...(dateRaw ? { date: new Date(`${dateRaw}T12:00:00`) } : {}),
     },
   });
   revalidatePath("/despesas");
@@ -87,12 +88,13 @@ export async function createSubscription(formData: FormData) {
   const product = await prisma.product.findUnique({ where: { id: productId } });
   const amountRaw = formData.get("amount");
   const amount = amountRaw ? toNumber(amountRaw) : toNumber(product?.defaultPrice);
-  const dueDay = Number(formData.get("dueDay") || 5);
   const cycle = (formData.get("cycle") as BillingCycle) || "MONTHLY";
 
-  // Próximo vencimento: próximo dia "dueDay" a partir de hoje.
-  let next = withDueDay(new Date(), dueDay);
-  if (next < new Date()) next = advanceDueDate(next, cycle);
+  // Data da 1ª cobrança escolhida pelo usuário (no fuso local); fallback: hoje.
+  const startRaw = String(formData.get("startDate") || "");
+  const next = startRaw ? new Date(`${startRaw}T00:00:00`) : new Date();
+  // Dia do vencimento recorrente = dia da 1ª cobrança (limitado a 1–28).
+  const dueDay = Math.min(Math.max(next.getDate(), 1), 28);
 
   await prisma.subscription.create({
     data: {
@@ -104,6 +106,24 @@ export async function createSubscription(formData: FormData) {
       nextDueDate: next,
     },
   });
+  revalidatePath("/assinaturas");
+}
+
+// Cancela a assinatura: para de gerar cobranças automáticas, mantém o registro.
+export async function cancelSubscription(formData: FormData) {
+  const id = String(formData.get("subscriptionId"));
+  await prisma.subscription.update({
+    where: { id },
+    data: { status: "CANCELED" },
+  });
+  revalidatePath("/assinaturas");
+}
+
+// Exclui a assinatura. As faturas já geradas são preservadas (desvinculadas).
+export async function deleteSubscription(formData: FormData) {
+  const id = String(formData.get("subscriptionId"));
+  await prisma.invoice.updateMany({ where: { subscriptionId: id }, data: { subscriptionId: null } });
+  await prisma.subscription.delete({ where: { id } });
   revalidatePath("/assinaturas");
 }
 

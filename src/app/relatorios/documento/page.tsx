@@ -85,7 +85,7 @@ export default async function RelatorioDocumentoPage({
             head={["Tipo", "Valor", "%"]}
             rows={[
               ["Mensalidades", formatCurrency(r.revenueByType.SUBSCRIPTION), pct(r.revenueByType.SUBSCRIPTION, typeTotal)],
-              ["Implementação", formatCurrency(r.revenueByType.IMPLEMENTATION), pct(r.revenueByType.IMPLEMENTATION, typeTotal)],
+              ["Implantação", formatCurrency(r.revenueByType.IMPLEMENTATION), pct(r.revenueByType.IMPLEMENTATION, typeTotal)],
               ["Avulsos", formatCurrency(r.revenueByType.EXTRA), pct(r.revenueByType.EXTRA, typeTotal)],
             ]}
           />

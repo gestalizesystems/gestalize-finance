@@ -12,38 +12,40 @@ export function NewInvoiceForm({ clients }: { clients: ClientOpt[] }) {
 
   return (
     <form action={createInvoice} className="card space-y-3">
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        <select name="clientId" required className="input lg:col-span-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <select name="clientId" required className="input sm:col-span-2 lg:col-span-2">
           <option value="">Selecione o cliente</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
 
-        <input name="description" required placeholder="Descrição (ex: Bot WhatsApp)" className="input lg:col-span-2" />
-
-        {combo ? (
-          <>
-            <input name="implAmount" type="number" step="0.01" min="0" placeholder="Implantação (R$)" className="input" />
-            <input name="subAmount" type="number" step="0.01" min="0" placeholder="Mensalidade (R$)" className="input" />
-          </>
-        ) : (
-          <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
-        )}
-
-        <input name="dueDate" type="date" required min={today} defaultValue={today} className="input" />
+        <input name="description" required placeholder="Descrição (ex: Bot WhatsApp)" className="input sm:col-span-2 lg:col-span-2" />
 
         <select
           name="type"
           value={type}
           onChange={(e) => setType(e.target.value)}
-          className="input lg:col-span-2"
+          className="input sm:col-span-2 lg:col-span-2"
         >
-          <option value="IMPLEMENTATION">Implementação</option>
+          <option value="IMPLEMENTATION">Implantação</option>
           <option value="EXTRA">Avulso / Upgrade</option>
           <option value="SUBSCRIPTION">Mensalidade</option>
           <option value="COMBO">Implantação + Mensalidade</option>
         </select>
+
+        {combo ? (
+          <>
+            <input name="implAmount" type="number" step="0.01" min="0" placeholder="Implantação (R$)" className="input lg:col-span-2" />
+            <input name="subAmount" type="number" step="0.01" min="0" placeholder="Mensalidade (R$)" className="input lg:col-span-2" />
+            <input name="dueDate" type="date" required min={today} defaultValue={today} className="input lg:col-span-2" />
+          </>
+        ) : (
+          <>
+            <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input lg:col-span-3" />
+            <input name="dueDate" type="date" required min={today} defaultValue={today} className="input lg:col-span-3" />
+          </>
+        )}
       </div>
 
       {combo && (

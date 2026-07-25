@@ -160,7 +160,7 @@ export function ProfitChart({
   );
 }
 
-// Receita por tipo (implementação / mensalidade / avulso).
+// Receita por tipo (implantação / mensalidade / avulso).
 export function RevenueTypeDonut({
   implementation,
   subscription,
@@ -172,7 +172,7 @@ export function RevenueTypeDonut({
 }) {
   const data = [
     { name: "Mensalidades", value: subscription, color: "#2563eb" },
-    { name: "Implementação", value: implementation, color: "#22c55e" },
+    { name: "Implantação", value: implementation, color: "#22c55e" },
     { name: "Avulsos", value: extra, color: "#f59e0b" },
   ];
   return (

@@ -91,13 +91,13 @@ async function main() {
         data: { invoiceId: inv.id, amount: s.amount, method: "PIX", paidAt: addDays(due, 1) },
       });
     }
-    // Implementação avulsa em alguns meses (entrada única).
+    // Implantação avulsa em alguns meses (entrada única).
     if (m % 2 === 0) {
       const inv = await prisma.invoice.create({
         data: {
           clientId: exemplo.id,
           productId: pdv.id,
-          description: "Taxa de implementação Sistema PDV",
+          description: "Taxa de implantação Sistema PDV",
           type: "IMPLEMENTATION",
           amount: 800,
           dueDate: addDays(monthRef, 10),
@@ -136,7 +136,7 @@ async function main() {
   for (let m = 5; m >= 0; m--) {
     const monthRef = startOfMonth(subMonths(now, m));
     await prisma.cost.create({ data: { description: "Servidor / Hospedagem (VPS)", amount: 320, category: "SERVER", recurring: true, date: monthRef } });
-    await prisma.cost.create({ data: { description: "API WhatsApp (Z-API)", amount: 99, category: "API", recurring: true, date: monthRef } });
+    await prisma.cost.create({ data: { description: "API WhatsApp (Evolution)", amount: 99, category: "API", recurring: true, date: monthRef } });
     await prisma.cost.create({ data: { description: "Ferramentas / SaaS diversos", amount: 180, category: "FIXED", recurring: true, date: monthRef } });
     await prisma.cost.create({ data: { description: "Custo direto cliente Empresa Exemplo", amount: 120, category: "PER_CLIENT", clientId: exemplo.id, productId: pdv.id, date: monthRef } });
   }

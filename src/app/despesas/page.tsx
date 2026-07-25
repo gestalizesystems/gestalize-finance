@@ -41,13 +41,14 @@ export default async function DespesasPage({
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const totalAmount = toNumber(totalAgg._sum.amount);
   const hrefForPage = (p: number) => `/despesas?page=${p}`;
+  const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
 
   return (
     <div className="space-y-6">
       <PageHeader title="Despesas" subtitle="Custos por sistema, ferramentas, servidores e fixos." />
 
       <form action={createCost} className="card space-y-3">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <input name="description" required placeholder="Descrição do custo" className="input" />
           <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
           <select name="category" required defaultValue="" className="input">
@@ -62,6 +63,7 @@ export default async function DespesasPage({
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          <input name="date" type="date" required defaultValue={today} title="Data da despesa" className="input" />
           <label className="flex items-center gap-2 px-1 text-sm text-slate-300">
             <input type="checkbox" name="recurring" className="h-4 w-4 rounded border-ink-700 bg-ink-900" />
             Recorrente

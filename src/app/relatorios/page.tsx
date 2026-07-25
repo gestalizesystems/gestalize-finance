@@ -100,7 +100,7 @@ export default async function RelatoriosPage({
           />
           <div className="mt-2 space-y-1.5 text-sm">
             <TypeRow color="bg-brand" label="Mensalidades" value={r.revenueByType.SUBSCRIPTION} total={typeTotal} />
-            <TypeRow color="bg-positive" label="Implementação" value={r.revenueByType.IMPLEMENTATION} total={typeTotal} />
+            <TypeRow color="bg-positive" label="Implantação" value={r.revenueByType.IMPLEMENTATION} total={typeTotal} />
             <TypeRow color="bg-warning" label="Avulsos" value={r.revenueByType.EXTRA} total={typeTotal} />
           </div>
         </div>

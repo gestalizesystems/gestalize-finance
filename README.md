@@ -1,95 +1,127 @@
-# Gestalize Finance
+<p align="center">
+  <img src="./banner1.png" alt="Gestalize Finance Banner" width="100%">
+</p>
 
-Sistema financeiro e de cobranças da **Gestalize Systems** — controle de
-entradas (implementação, mensalidades, avulsos), saídas (custos por sistema,
-ferramentas, servidores), assinaturas recorrentes e motor de cobrança com
-link de pagamento (Asaas).
+<h1 align="center">Gestalize Finance</h1>
 
-## Stack
+<p align="center">
+  Financial Operations Platform for Modern Businesses
+</p>
 
-- **Next.js 14** (App Router, TypeScript) + **Tailwind CSS**
-- **Prisma** + **PostgreSQL** (via Docker)
-- **Recharts** (gráficos) · **lucide-react** (ícones)
-- Camada de pagamento **Asaas** (modo `mock` por padrão)
+<p align="center">
+  Manage customers, subscriptions, invoicing, recurring revenue and financial operations through a modern, centralized platform.
+</p>
 
-## Como rodar (local)
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
+</p>
 
-> Requer Node 18+. Na sua máquina: `nvm use 18.20.8`.
+<p align="center">
+  Developed by <strong>Gestalize Systems</strong>
+</p>
 
-```bash
-# 1. Sobe o banco (Postgres na porta 5433 p/ não conflitar com o Postgres nativo)
-docker compose up -d
+---
 
-# 2. Aplica o schema e popula com dados de exemplo
-npx prisma migrate dev
-npm run seed
+## Overview
 
-# 3. Sobe o app (porta 3010 p/ não conflitar com o app Rails na 3000)
-npm run dev
-# abra http://localhost:3010
-```
+Gestalize Finance is a modern financial operations platform designed to help businesses manage customers, subscriptions, recurring billing, revenue and financial performance from a single application.
 
-Scripts úteis:
+The platform centralizes the entire billing lifecycle, automates recurring operations and provides real-time financial visibility through dashboards, reports and intelligent automation, reducing manual work while improving operational efficiency.
 
-- `npm run seed` — popula o banco com dados de demonstração
-- `npm run db:studio` — abre o Prisma Studio (visualizar/editar dados)
+## Business Problem
 
-## Estrutura
+Businesses that operate with recurring services often rely on disconnected spreadsheets, manual invoicing and fragmented financial tools.
+
+As customer volume grows, billing, payment tracking and financial reporting become increasingly time-consuming, reducing operational efficiency and increasing the risk of errors.
+
+Organizations need a centralized platform capable of automating financial operations while providing accurate, real-time visibility into business performance.
+
+## Solution
+
+Gestalize Finance centralizes customer management, subscriptions, billing, payments and financial reporting into a single platform.
+
+Recurring invoices are generated automatically, payment status is continuously synchronized and financial indicators remain up to date, allowing organizations to focus on growth instead of repetitive administrative tasks.
+
+## Key Features
+
+- Financial dashboard with revenue, recurring revenue, average ticket, and
+  delinquency indicators.
+- Client management with per-client financial results.
+- Product and service catalog with subscription and implementation pricing.
+- Recurring subscriptions on monthly and annual cycles.
+- Invoice generation, including combined implementation and subscription charges
+  settled in a single payment.
+- Automated dunning with pre-due and overdue notifications.
+- Automatic payment reconciliation.
+- Reporting by period with PDF export.
+- Editable message templates for customer communication.
+- Private access with optional two-factor authentication.
+- Responsive interface for desktop, tablet, and mobile.
+
+## Architecture Overview
+
+Gestalize Finance is built around a modular architecture that separates financial operations, business rules, reporting and integrations into independent components.
+
+The platform automates recurring billing, payment processing and financial reporting while integrating seamlessly with external payment, email and messaging services. This modular design ensures scalability, maintainability and flexibility as business requirements evolve.
+
+## Technology Stack
+
+- Next.js 14 (App Router, Server Components, Server Actions) with TypeScript
+- Tailwind CSS
+- PostgreSQL with Prisma ORM
+- Recharts for data visualization
+- REST integrations for payment, email, and messaging providers
+
+## Project Structure
 
 ```
 src/
-  app/
-    page.tsx              # Dashboard
-    clientes/             # CRUD de clientes
-    cobrancas/            # Faturas + dar baixa + gerar cobrança avulsa
-    assinaturas/          # Planos recorrentes
-    produtos/             # Sistemas/serviços vendidos
-    despesas/             # Custos (saídas)
-    pagamentos/ receitas/ # Históricos
-    relatorios/ automacao/ mensagens/ configuracoes/  # Roadmap
-    actions.ts            # Server actions (criar/baixar/billing)
-    api/cron/billing/     # Endpoint do cron diário
-  lib/
-    prisma.ts             # Cliente Prisma (singleton)
-    asaas.ts              # Gateway de pagamento (mock | sandbox | live)
-    billing.ts            # Motor de cobrança (gera faturas, atrasos)
-    metrics.ts            # Agregações do dashboard (receita, MRR, etc.)
-    utils.ts              # Formatadores (R$, datas)
-prisma/
-  schema.prisma          # Modelo de dados
-  seed.ts                # Dados de exemplo
+  app/          Application routes and server actions
+  components/    User interface components
+  lib/           Business logic and integrations
+prisma/          Data model and migrations
 ```
 
-## Motor de cobrança
+## Screenshots
 
-`src/lib/billing.ts` contém a lógica central:
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="85%" />
+  <br />
+  <sub>Financial dashboard with revenue, recurring revenue, and billing automation.</sub>
+</p>
 
-- `generateDueInvoices()` — gera faturas das assinaturas no vencimento
-- `markOverdueInvoices()` — marca atrasos e inadimplência
-- `registerPayment()` — dá baixa e reativa o cliente
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/product.png" alt="Catalog" />
+      <br />
+      <sub>Product and service catalog.</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/reporting.png" alt="Reports" />
+      <br />
+      <sub>Financial reports by period.</sub>
+    </td>
+  </tr>
+</table>
 
-Pode ser disparado:
-- manualmente pelo botão **"Rodar motor de cobrança"** em `/cobrancas`
-- pelo endpoint `GET /api/cron/billing` (agende um cron job diário)
+<p align="center">
+  <img src="docs/screenshots/expenses.png" alt="Expenses" width="70%" />
+  <br />
+  <sub>Expense tracking by category.</sub>
+</p>
 
-## Ativando o Asaas (pagamentos reais)
+## Future Improvements
 
-Por padrão roda em **mock** (gera links fake, sem conta). Para ativar:
+- Multi-user access with role-based permissions.
+- Additional payment methods and installment options.
+- Advanced reporting and data export.
+- Audit logging for financial operations.
 
-1. Crie conta no Asaas e gere uma API key (comece pelo **sandbox**).
-2. No `.env`:
-   ```
-   ASAAS_MODE="sandbox"
-   ASAAS_API_KEY="sua_chave"
-   ASAAS_BASE_URL="https://sandbox.asaas.com/api/v3"
-   ```
-3. Reinicie o app. As novas cobranças passam a gerar Pix/boleto/cartão reais.
+## License
 
-Falta plugar ainda (próximas etapas): **webhook** do Asaas para confirmar
-pagamento automaticamente, e os envios de **WhatsApp** (Z-API/Twilio) e
-**e-mail** (Resend) da régua de cobrança.
-
-## Notas do ambiente local
-
-- Há um **Postgres nativo** na porta 5432 → o Docker usa a **5433**.
-- Há um **app Rails** na porta 3000 → o Next usa a **3010**.
+Gestalize Finance is proprietary software developed and maintained by Gestalize
+Systems. All rights reserved.

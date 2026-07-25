@@ -96,7 +96,7 @@ export async function generateDueInvoices(horizonDays = 0) {
     // Envia e-mail de cobrança (se o cliente tiver e-mail e o Resend estiver ligado).
     if (sub.client.email) {
       try {
-        const { subject, html } = renderInvoiceEmail({
+        const { subject, html } = await renderInvoiceEmail({
           clientName: sub.client.name,
           description: `Mensalidade ${sub.product.name}`,
           amount: sub.amount,
@@ -112,7 +112,7 @@ export async function generateDueInvoices(horizonDays = 0) {
     // Envia WhatsApp de cobrança (se o cliente tiver telefone e o Z-API estiver ligado).
     if (sub.client.phone) {
       try {
-        const message = renderInvoiceWhatsApp({
+        const message = await renderInvoiceWhatsApp({
           clientName: sub.client.name,
           description: `Mensalidade ${sub.product.name}`,
           amount: sub.amount,

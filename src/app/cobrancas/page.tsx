@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { ExternalLink, Play, Mail, MessageCircle } from "lucide-react";
+import { ExternalLink, Play, Mail, MessageCircle, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { gatewayMode } from "@/lib/asaas";
 import { PageHeader, InvoiceStatusBadge } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
 import {
-  createInvoice,
   markPaid,
   runBilling,
   sendInvoiceEmail,
   sendInvoiceWhatsApp,
+  deleteInvoice,
 } from "../actions";
+import { NewInvoiceForm } from "@/components/NewInvoiceForm";
 
 export const dynamic = "force-dynamic";
 
@@ -58,25 +59,7 @@ export default async function CobrancasPage({
       />
 
       {/* Nova cobrança avulsa */}
-      <form action={createInvoice} className="card space-y-3">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-          <select name="clientId" required className="input">
-            <option value="">Selecione o cliente</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <input name="description" required placeholder="Descrição (ex: Implementação)" className="input" />
-          <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
-          <input name="dueDate" type="date" required className="input" />
-          <select name="type" className="input">
-            <option value="IMPLEMENTATION">Implementação</option>
-            <option value="EXTRA">Avulso / Upgrade</option>
-            <option value="SUBSCRIPTION">Mensalidade</option>
-          </select>
-        </div>
-        <button className="btn-primary">+ Gerar cobrança (com link de pagamento)</button>
-      </form>
+      <NewInvoiceForm clients={clients} />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
@@ -142,6 +125,15 @@ export default async function CobrancasPage({
                     ) : (
                       <span className="text-xs text-slate-500">{inv.paidAt ? formatDate(inv.paidAt) : "Pago"}</span>
                     )}
+                    <form action={deleteInvoice}>
+                      <input type="hidden" name="invoiceId" value={inv.id} />
+                      <button
+                        title="Excluir cobrança"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg bg-negative/15 text-negative hover:bg-negative/25"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </form>
                   </div>
                 </td>
               </tr>

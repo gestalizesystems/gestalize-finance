@@ -35,11 +35,22 @@ const nav = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  className,
+  onNavigate,
+}: {
+  className?: string;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-ink-700/60 bg-ink-900 px-4 py-5">
+    <aside
+      className={cn(
+        "flex h-full w-64 shrink-0 flex-col border-r border-ink-700/60 bg-ink-900 px-4 py-5",
+        className,
+      )}
+    >
       {/* Logo */}
       <Logo className="mb-7 px-2" />
 
@@ -55,6 +66,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn("nav-item", active && "nav-item-active")}
             >
               <Icon className="h-[18px] w-[18px]" />

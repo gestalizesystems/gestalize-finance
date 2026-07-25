@@ -1,8 +1,9 @@
+import { Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
-import { createCost } from "../actions";
+import { createCost, deleteCost } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +50,14 @@ export default async function DespesasPage({
         <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
           <input name="description" required placeholder="Descrição do custo" className="input" />
           <input name="amount" type="number" step="0.01" required placeholder="Valor (R$)" className="input" />
-          <select name="category" className="input">
+          <select name="category" required defaultValue="" className="input">
+            <option value="" disabled>Tipo de despesa</option>
             {Object.entries(categoryLabel).map(([v, l]) => (
               <option key={v} value={v}>{l}</option>
             ))}
           </select>
-          <select name="clientId" className="input">
-            <option value="">Sem cliente</option>
+          <select name="clientId" defaultValue="" className="input">
+            <option value="">Cliente (opcional)</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -82,7 +84,8 @@ export default async function DespesasPage({
               <th className="pb-3 pr-4 font-medium">Categoria</th>
               <th className="pb-3 pr-4 font-medium">Cliente</th>
               <th className="pb-3 pr-4 font-medium">Data</th>
-              <th className="pb-3 font-medium text-right">Valor</th>
+              <th className="pb-3 pr-4 font-medium text-right">Valor</th>
+              <th className="pb-3 font-medium"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink-700/40">
@@ -95,12 +98,23 @@ export default async function DespesasPage({
                 <td className="py-3.5 pr-4">{categoryLabel[c.category]}</td>
                 <td className="py-3.5 pr-4">{c.client?.name ?? "—"}</td>
                 <td className="py-3.5 pr-4">{formatDate(c.date)}</td>
-                <td className="py-3.5 text-right font-semibold text-negative">{formatCurrency(c.amount)}</td>
+                <td className="py-3.5 pr-4 text-right font-semibold text-negative">{formatCurrency(c.amount)}</td>
+                <td className="py-3.5 text-right">
+                  <form action={deleteCost} className="inline-block">
+                    <input type="hidden" name="costId" value={c.id} />
+                    <button
+                      title="Excluir despesa"
+                      className="flex h-7 w-7 items-center justify-center rounded-lg bg-negative/15 text-negative hover:bg-negative/25"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </form>
+                </td>
               </tr>
             ))}
             {costs.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-slate-500">Nenhuma despesa registrada.</td>
+                <td colSpan={6} className="py-8 text-center text-slate-500">Nenhuma despesa registrada.</td>
               </tr>
             )}
           </tbody>

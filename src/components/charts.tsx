@@ -188,26 +188,3 @@ export function RevenueTypeDonut({
     </ResponsiveContainer>
   );
 }
-
-// Sparkline minimalista usada nos cards de topo.
-export function Sparkline({
-  data,
-  color,
-}: {
-  data: MonthDatum[];
-  color: string;
-}) {
-  return (
-    <ResponsiveContainer width="100%" height={40}>
-      <LineChart data={data}>
-        <Line
-          type="monotone"
-          dataKey="receita"
-          stroke={color}
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-}

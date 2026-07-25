@@ -162,6 +162,13 @@ model Payment {
   @@index([invoiceId])
 }
 
+// Configurações editáveis (chave-valor): dados da empresa, templates de mensagem.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Cost {
   id          String       @id @default(cuid())
   description String

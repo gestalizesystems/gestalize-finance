@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getMonthsWithData } from "@/lib/metrics";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
 import { MonthFilter } from "@/components/MonthFilter";
@@ -32,7 +33,7 @@ export default async function ReceitasPage({
 
   const where = { status: "PAID" as const, ...(range ? { paidAt: range } : {}) };
 
-  const [total, invoices] = await Promise.all([
+  const [total, invoices, monthsWithData] = await Promise.all([
     prisma.invoice.count({ where }),
     prisma.invoice.findMany({
       where,
@@ -41,6 +42,7 @@ export default async function ReceitasPage({
       take: PAGE_SIZE,
       include: { client: true },
     }),
+    getMonthsWithData(),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -56,7 +58,7 @@ export default async function ReceitasPage({
       <PageHeader
         title="Receitas"
         subtitle="Entradas confirmadas: implementação, mensalidades e avulsos."
-        action={<MonthFilter />}
+        action={<MonthFilter months={monthsWithData} />}
       />
 
       <div className="card overflow-x-auto">

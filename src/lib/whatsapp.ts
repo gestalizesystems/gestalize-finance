@@ -4,11 +4,15 @@
 
 import { onlyDigits } from "./masks";
 import { formatCurrency, formatDate } from "./utils";
+import {
+  getSettings,
+  applyTemplate,
+  SETTING_KEYS,
+} from "./settings";
 
 const BASE_URL = (process.env.EVOLUTION_BASE_URL || "").replace(/\/+$/, "");
 const INSTANCE = process.env.EVOLUTION_INSTANCE;
 const API_KEY = process.env.EVOLUTION_API_KEY;
-const COMPANY = process.env.COMPANY_NAME || "Gestalize Systems";
 
 export function whatsappEnabled() {
   return Boolean(BASE_URL && INSTANCE && API_KEY);
@@ -59,17 +63,14 @@ type InvoiceWaData = {
   paymentLink?: string | null;
 };
 
-export function renderInvoiceWhatsApp(d: InvoiceWaData): string {
-  const valor = formatCurrency(d.amount);
-  const venc = formatDate(d.dueDate);
-  const link = d.paymentLink ? `\n\n👉 Pagar agora: ${d.paymentLink}` : "";
-  return (
-    `Olá, ${d.clientName}! 👋\n\n` +
-    `Você tem uma cobrança da *${COMPANY}*:\n\n` +
-    `💰 Valor: *${valor}*\n` +
-    `📅 Vencimento: ${venc}\n` +
-    `📄 ${d.description}` +
-    link +
-    `\n\nQualquer dúvida, é só responder por aqui. 🙂`
-  );
+export async function renderInvoiceWhatsApp(d: InvoiceWaData): Promise<string> {
+  const cfg = await getSettings([SETTING_KEYS.waTemplate, SETTING_KEYS.companyName]);
+  return applyTemplate(cfg[SETTING_KEYS.waTemplate], {
+    cliente: d.clientName,
+    valor: formatCurrency(d.amount),
+    vencimento: formatDate(d.dueDate),
+    descricao: d.description,
+    link: d.paymentLink ?? "",
+    empresa: cfg[SETTING_KEYS.companyName],
+  });
 }

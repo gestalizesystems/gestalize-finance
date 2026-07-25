@@ -85,8 +85,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, ignored: event });
   }
 
-  // Localiza a fatura por externalReference (nosso id) ou id do gateway.
-  const invoice = await prisma.invoice.findFirst({
+  // Localiza as faturas: um pagamento pode estar ligado a MAIS de uma fatura
+  // (ex: Implantação + Mensalidade compartilham o mesmo externalId).
+  const invoices = await prisma.invoice.findMany({
     where: {
       OR: [
         payment.externalReference ? { id: String(payment.externalReference) } : undefined,
@@ -94,64 +95,45 @@ export async function POST(req: Request) {
       ].filter(Boolean) as object[],
     },
   });
-  if (!invoice) {
+  if (invoices.length === 0) {
     return NextResponse.json({ ok: true, warning: "invoice não encontrada" });
   }
 
-  // ---------- PAGO ----------
-  if (PAID_EVENTS.has(event)) {
-    if (invoice.status === "PAID") {
-      return NextResponse.json({ ok: true, alreadyPaid: true });
-    }
-    await prisma.payment.create({
-      data: {
-        invoiceId: invoice.id,
-        amount: payment.value != null ? Number(payment.value) : invoice.amount,
-        method: mapMethod(payment.billingType),
-        paidAt: new Date(),
-        externalId: payment.id ? String(payment.id) : null,
-      },
-    });
-    await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: { status: "PAID", paidAt: new Date() },
-    });
-    await refreshClientStatus(invoice.clientId);
-    return NextResponse.json({ ok: true, invoiceId: invoice.id, status: "PAID" });
-  }
+  const clientIds: string[] = [];
+  for (const invoice of invoices) {
+    if (!clientIds.includes(invoice.clientId)) clientIds.push(invoice.clientId);
 
-  // ---------- VENCIDA ----------
-  if (OVERDUE_EVENTS.has(event)) {
-    if (invoice.status === "PENDING") {
+    if (PAID_EVENTS.has(event)) {
+      if (invoice.status === "PAID") continue;
+      await prisma.payment.create({
+        data: {
+          invoiceId: invoice.id,
+          amount: invoice.amount, // cada fatura registra seu próprio valor
+          method: mapMethod(payment.billingType),
+          paidAt: new Date(),
+          externalId: payment.id ? String(payment.id) : null,
+        },
+      });
       await prisma.invoice.update({
         where: { id: invoice.id },
-        data: { status: "OVERDUE" },
+        data: { status: "PAID", paidAt: new Date() },
+      });
+    } else if (OVERDUE_EVENTS.has(event)) {
+      if (invoice.status === "PENDING") {
+        await prisma.invoice.update({ where: { id: invoice.id }, data: { status: "OVERDUE" } });
+      }
+    } else if (CANCEL_EVENTS.has(event)) {
+      await prisma.invoice.update({ where: { id: invoice.id }, data: { status: "CANCELED" } });
+    } else if (REFUND_EVENTS.has(event)) {
+      await prisma.payment.deleteMany({ where: { invoiceId: invoice.id } });
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { status: "CANCELED", paidAt: null },
       });
     }
-    await refreshClientStatus(invoice.clientId);
-    return NextResponse.json({ ok: true, invoiceId: invoice.id, status: "OVERDUE" });
   }
 
-  // ---------- REMOVIDA ----------
-  if (CANCEL_EVENTS.has(event)) {
-    await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: { status: "CANCELED" },
-    });
-    await refreshClientStatus(invoice.clientId);
-    return NextResponse.json({ ok: true, invoiceId: invoice.id, status: "CANCELED" });
-  }
+  for (const cid of clientIds) await refreshClientStatus(cid);
 
-  // ---------- ESTORNADA (desfaz a baixa) ----------
-  if (REFUND_EVENTS.has(event)) {
-    await prisma.payment.deleteMany({ where: { invoiceId: invoice.id } });
-    await prisma.invoice.update({
-      where: { id: invoice.id },
-      data: { status: "CANCELED", paidAt: null },
-    });
-    await refreshClientStatus(invoice.clientId);
-    return NextResponse.json({ ok: true, invoiceId: invoice.id, status: "REFUNDED" });
-  }
-
-  return NextResponse.json({ ok: true, ignored: event });
+  return NextResponse.json({ ok: true, invoices: invoices.length, event });
 }

@@ -5,7 +5,6 @@ import {
   Receipt,
   Plus,
   Bell,
-  Calendar,
   Copy,
   MessageCircle,
   Mail,
@@ -15,19 +14,31 @@ import {
   getDashboardMetrics,
   getRecentInvoices,
   getUpcomingInvoices,
+  getMonthsWithData,
 } from "@/lib/metrics";
-import { formatCurrency, formatDate, formatMonthYear } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { StatCard, InvoiceStatusBadge } from "@/components/ui";
 import { RevenueExpenseChart, StatusDonut, MrrTrendChart } from "@/components/charts";
 import { BillingFlow, AutomationPanel } from "@/components/dashboard-panels";
+import { MonthFilter } from "@/components/MonthFilter";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
-  const [metrics, recent, upcoming] = await Promise.all([
-    getDashboardMetrics(),
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: { month?: string };
+}) {
+  const month = searchParams.month;
+  const refDate = month
+    ? new Date(Number(month.split("-")[0]), Number(month.split("-")[1]) - 1, 1)
+    : new Date();
+
+  const [metrics, recent, upcoming, monthsWithData] = await Promise.all([
+    getDashboardMetrics(refDate),
     getRecentInvoices(4),
     getUpcomingInvoices(3),
+    getMonthsWithData(),
   ]);
 
   const { paid, pending, overdue, total } = metrics.invoiceStatus;
@@ -36,20 +47,17 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-white">
+          <h1 className="flex items-center gap-2 text-xl font-bold text-white sm:text-2xl">
             Olá, Gestalize! <span>👋</span>
           </h1>
           <p className="mt-0.5 text-sm text-slate-400">
             Aqui está o resumo financeiro do seu negócio.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-xl border border-ink-700 bg-ink-850 px-3.5 py-2.5 text-sm text-slate-300">
-            <Calendar className="h-4 w-4 text-slate-400" />
-            {formatMonthYear(new Date())}
-          </div>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <MonthFilter months={monthsWithData} allLabel="Mês atual" />
           <button className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-ink-700 bg-ink-850 text-slate-300">
             <Bell className="h-[18px] w-[18px]" />
             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-negative text-[10px] font-bold text-white">

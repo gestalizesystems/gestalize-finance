@@ -12,7 +12,7 @@ export function NewInvoiceForm({ clients }: { clients: ClientOpt[] }) {
 
   return (
     <form action={createInvoice} className="card space-y-3">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid grid-cols-1 gap-3 overflow-hidden sm:grid-cols-2 lg:grid-cols-6">
         <select name="clientId" required className="input sm:col-span-2 lg:col-span-2">
           <option value="">Selecione o cliente</option>
           {clients.map((c) => (

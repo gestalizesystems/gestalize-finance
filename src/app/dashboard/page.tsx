@@ -4,7 +4,6 @@ import {
   RefreshCw,
   Receipt,
   Plus,
-  Bell,
   Copy,
   MessageCircle,
   Mail,
@@ -16,11 +15,13 @@ import {
   getUpcomingInvoices,
   getMonthsWithData,
 } from "@/lib/metrics";
+import { getNotifications } from "@/lib/notifications";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { StatCard, InvoiceStatusBadge } from "@/components/ui";
 import { RevenueExpenseChart, StatusDonut, MrrTrendChart } from "@/components/charts";
 import { BillingFlow, AutomationPanel } from "@/components/dashboard-panels";
 import { MonthFilter } from "@/components/MonthFilter";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +35,12 @@ export default async function DashboardPage({
     ? new Date(Number(month.split("-")[0]), Number(month.split("-")[1]) - 1, 1)
     : new Date();
 
-  const [metrics, recent, upcoming, monthsWithData] = await Promise.all([
+  const [metrics, recent, upcoming, monthsWithData, notifications] = await Promise.all([
     getDashboardMetrics(refDate),
     getRecentInvoices(4),
     getUpcomingInvoices(3),
     getMonthsWithData(),
+    getNotifications(12),
   ]);
 
   const { paid, pending, overdue, total } = metrics.invoiceStatus;
@@ -58,12 +60,7 @@ export default async function DashboardPage({
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <MonthFilter months={monthsWithData} allLabel="Mês atual" />
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-ink-700 bg-ink-850 text-slate-300">
-            <Bell className="h-[18px] w-[18px]" />
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-negative text-[10px] font-bold text-white">
-              {pending + overdue}
-            </span>
-          </button>
+          <NotificationsBell items={notifications} count={pending + overdue} />
           <Link href="/cobrancas" className="btn-primary">
             <Plus className="h-4 w-4" />
             Nova Cobrança

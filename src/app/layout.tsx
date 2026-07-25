@@ -40,12 +40,14 @@ export const metadata: Metadata = {
     description:
       "Gestão financeira e cobranças da Gestalize Systems: receitas, despesas, MRR e cobrança automática por Pix/boleto.",
     locale: "pt_BR",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Gestalize Finance" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Gestalize Finance",
     description:
       "Gestão financeira e cobranças da Gestalize Systems: receitas, despesas, MRR e cobrança automática.",
+    images: ["/og-image.png"],
   },
 };
 

@@ -44,12 +44,12 @@ export default async function RelatoriosPage({
           title="Relatórios"
           subtitle="Faturamento, MRR, lucro e inadimplência no período."
           action={
-            <div className="flex flex-wrap items-end gap-3">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
               <DateRangeFilter start={toInputDate(start)} end={toInputDate(end)} />
               <Link
                 href={`/relatorios/documento?start=${toInputDate(start)}&end=${toInputDate(end)}`}
                 target="_blank"
-                className="btn-primary"
+                className="btn-primary w-full justify-center sm:w-auto"
               >
                 <FileText className="h-4 w-4" /> Gerar PDF
               </Link>

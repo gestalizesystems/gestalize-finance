@@ -3,13 +3,18 @@ import type { NextRequest } from "next/server";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 
 export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Landing page pública (servida em "/" via rewrite para /landing.html).
+  if (pathname === "/") return NextResponse.next();
+
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = await verifySessionToken(token);
-  const isLoginPage = req.nextUrl.pathname.startsWith("/login");
+  const isLoginPage = pathname.startsWith("/login");
 
   // Já logado tentando ver o login → manda pro dashboard.
   if (isLoginPage) {
-    if (session) return NextResponse.redirect(new URL("/", req.url));
+    if (session) return NextResponse.redirect(new URL("/dashboard", req.url));
     return NextResponse.next();
   }
 

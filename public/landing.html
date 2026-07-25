@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Gestalize Finance — Plataforma de Operações Financeiras</title>
+<link rel="icon" type="image/png" href="/gestalize-bot.png" />
+<meta name="description" content="Gestalize Finance é a plataforma de operações financeiras para empresas modernas. Gerencie clientes, assinaturas e cobrança recorrente, automatize a régua de cobrança e tenha visibilidade financeira em tempo real." />
+<meta property="og:title" content="Gestalize Finance — Plataforma de Operações Financeiras" />
+<meta property="og:description" content="Gerencie receita recorrente e operações financeiras em uma única plataforma moderna." />
+<meta property="og:image" content="/gestalize-bot.png" />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #07090F;
+    --bg2:       #0A0F1B;
+    --surface:   #0E1524;
+    --blue:      #2563EB;
+    --blue-lt:   #3B82F6;
+    --blue-soft: rgba(37,99,235,0.10);
+    --white:     #F5F8FD;
+    --text:      #C4D0E6;
+    --muted:     #8493AE;
+    --border:    rgba(255,255,255,0.08);
+    --border-hi: rgba(37,99,235,0.30);
+    --radius:    18px;
+    --shadow:    0 24px 70px rgba(0,0,0,0.55);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    touch-action: pan-y;
+  }
+  a { text-decoration: none; color: inherit; }
+  .container { max-width: 1140px; margin: 0 auto; padding: 0 6%; }
+  section { padding: 7rem 0; }
+
+  /* ── Background dots ── */
+  #bgDots { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+
+  /* ── Typography scale ── */
+  .eyebrow {
+    display: inline-block; color: var(--blue-lt);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; margin-bottom: 1.1rem;
+  }
+  h1, h2, h3 { color: var(--white); letter-spacing: -0.02em; }
+  .h2 { font-size: clamp(1.9rem, 3.4vw, 2.7rem); font-weight: 800; line-height: 1.12; }
+  .lead { color: var(--muted); font-size: 1.05rem; line-height: 1.7; max-width: 560px; }
+  .section-head { max-width: 620px; margin-bottom: 3.5rem; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.94rem; font-weight: 600; border-radius: 11px;
+    padding: 0.8rem 1.5rem; transition: all 0.18s ease; cursor: pointer;
+    border: 1px solid transparent; white-space: nowrap;
+  }
+  .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 6px 22px rgba(37,99,235,0.35); }
+  .btn-primary:hover { background: var(--blue-lt); transform: translateY(-1px); box-shadow: 0 10px 30px rgba(37,99,235,0.45); }
+  .btn-ghost { color: var(--white); border-color: var(--border); }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.28); transform: translateY(-1px); }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(7,9,15,0.72); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    /* respeita a barra de status / notch (safe-area) para não sobrepor */
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .nav-inner { max-width: 1140px; margin: 0 auto; padding: 0.85rem 6%;
+    display: flex; align-items: center; justify-content: space-between; }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-logo img { width: 32px; height: 32px; object-fit: contain; }
+  .nav-logo-text { font-size: 1.05rem; font-weight: 800; color: var(--white); letter-spacing: -0.02em; }
+  .nav-logo-text span { color: var(--blue-lt); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: color 0.18s; }
+  .nav-links a:hover { color: var(--white); }
+  .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+  .nav-signin { color: var(--muted); font-size: 0.9rem; font-weight: 500; transition: color 0.18s; }
+  .nav-signin:hover { color: var(--white); }
+
+  /* ── Hero ── */
+  .hero { padding: 11rem 0 5rem; text-align: center; position: relative; }
+  .hero-glow {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 620px; z-index: -1; pointer-events: none;
+    background: radial-gradient(ellipse at center top, rgba(37,99,235,0.16) 0%, transparent 68%);
+  }
+  .hero .eyebrow {
+    background: var(--blue-soft); border: 1px solid rgba(37,99,235,0.22);
+    padding: 0.35rem 0.9rem; border-radius: 100px; margin-bottom: 1.8rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.6rem, 5.4vw, 4.3rem); font-weight: 800;
+    line-height: 1.05; max-width: 880px; margin: 0 auto 1.5rem;
+  }
+  .hero h1 em { font-style: normal; color: var(--blue-lt); }
+  .hero-sub { color: var(--muted); font-size: 1.15rem; line-height: 1.65; max-width: 580px; margin: 0 auto 2.4rem; }
+  .hero-actions { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
+
+  /* product frame */
+  .frame {
+    border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    background: #0B1120; box-shadow: var(--shadow), 0 0 0 1px rgba(37,99,235,0.06);
+  }
+  .frame-bar { display: flex; gap: 7px; padding: 11px 15px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015); }
+  .frame-bar i { width: 11px; height: 11px; border-radius: 50%; background: #263149; }
+  .frame img { display: block; width: 100%; height: auto; }
+  .hero-frame { max-width: 960px; margin: 4.5rem auto 0; position: relative; }
+  .hero-frame::after {
+    content: ''; position: absolute; inset: -1px -1px -40px; z-index: -1;
+    background: radial-gradient(ellipse at center, rgba(37,99,235,0.22), transparent 70%);
+    filter: blur(30px);
+  }
+
+  /* ── Logos / channels strip ── */
+  .strip { padding: 3rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .strip-inner { display: flex; align-items: center; justify-content: center; gap: 2.2rem; flex-wrap: wrap; }
+  .strip-label { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+  .strip-item { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.9rem; font-weight: 600; }
+  .strip-item svg { width: 17px; height: 17px; }
+
+  /* ── Problem ── */
+  .problem { background: var(--bg2); }
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+  .pain-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
+  .pain { display: flex; gap: 0.85rem; align-items: flex-start; }
+  .pain svg { width: 20px; height: 20px; color: var(--blue-lt); flex-shrink: 0; margin-top: 2px; }
+  .pain span { font-size: 0.95rem; color: var(--text); font-weight: 500; }
+
+  /* ── Features ── */
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 2rem 1.9rem; transition: border-color 0.22s, transform 0.22s, box-shadow 0.22s;
+  }
+  .card:hover { border-color: var(--border-hi); transform: translateY(-4px); box-shadow: 0 18px 50px rgba(0,0,0,0.45); }
+  .card-icon {
+    width: 46px; height: 46px; border-radius: 12px; margin-bottom: 1.4rem;
+    background: var(--blue-soft); border: 1px solid rgba(37,99,235,0.2);
+    display: flex; align-items: center; justify-content: center; color: var(--blue-lt);
+  }
+  .card-icon svg { width: 22px; height: 22px; }
+  .card h3 { font-size: 1.08rem; font-weight: 700; margin-bottom: 0.55rem; }
+  .card p { color: var(--muted); font-size: 0.92rem; line-height: 1.65; }
+
+  /* ── Product previews ── */
+  .previews { background: var(--bg2); }
+  .preview-lg { max-width: 960px; margin: 0 auto; }
+  .preview-cap { display: flex; align-items: baseline; gap: 0.6rem; margin: 1.3rem 0 0; flex-wrap: wrap; justify-content: center; text-align: center; }
+  .preview-cap strong { color: var(--white); font-weight: 700; font-size: 1rem; }
+  .preview-cap span { color: var(--muted); font-size: 0.92rem; }
+  .preview-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .preview-row .preview-cap { justify-content: flex-start; text-align: left; }
+
+  /* ── Audience ── */
+  .aud-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .aud {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 1.4rem 1.5rem; display: flex; align-items: center; gap: 0.9rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .aud:hover { border-color: var(--border-hi); background: #101a2e; }
+  .aud svg { width: 20px; height: 20px; color: var(--blue-lt); flex-shrink: 0; }
+  .aud span { font-size: 0.95rem; font-weight: 600; color: var(--white); }
+
+  /* ── Final CTA ── */
+  .cta {
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(37,99,235,0.14) 0%, transparent 62%), var(--bg);
+    border-top: 1px solid var(--border);
+  }
+  .cta h2 { font-size: clamp(2rem, 3.8vw, 3rem); font-weight: 800; line-height: 1.12; margin-bottom: 1.1rem; }
+  .cta p { color: var(--muted); font-size: 1.08rem; max-width: 500px; margin: 0 auto 2.4rem; }
+  .cta-actions { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ── Footer ── */
+  footer { border-top: 1px solid var(--border); padding: 2.5rem 0 calc(2.5rem + env(safe-area-inset-bottom, 0px)); }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .footer-logo { display: flex; align-items: center; gap: 8px; }
+  .footer-logo img { width: 26px; height: 26px; object-fit: contain; }
+  .footer-logo span { font-size: 0.92rem; font-weight: 700; color: var(--white); }
+  .footer-logo span em { font-style: normal; color: var(--blue-lt); }
+  footer p { color: var(--muted); font-size: 0.82rem; }
+
+  /* ── Scroll reveal motion ── */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    section { padding: 5rem 0; }
+    .nav-links { display: none; }
+    .feat-grid { grid-template-columns: 1fr 1fr; }
+    .aud-grid { grid-template-columns: 1fr 1fr; }
+    .problem-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    /* No mobile o topo mostra "Entrar" (a demo já aparece no hero). */
+    .nav-right .btn-primary { display: none; }
+    .nav-signin { display: inline-flex; align-items: center; background: var(--blue); color: #fff;
+      font-weight: 600; padding: 0.6rem 1.35rem; border-radius: 9px; }
+    .nav-signin:hover { background: var(--blue-lt); color: #fff; }
+  }
+  @media (max-width: 620px) {
+    .hero { padding: 8.5rem 0 3rem; }
+    .feat-grid, .aud-grid, .pain-list, .preview-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bgDots"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <img src="/gestalize-bot.png" alt="Gestalize Finance" />
+      <span class="nav-logo-text">Gestalize <span>Finance</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#platform">Plataforma</a></li>
+      <li><a href="#product">Produto</a></li>
+      <li><a href="#customers">Para quem é</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="/login" class="nav-signin">Entrar</a>
+      <a href="https://wa.me/5585987353914" class="btn btn-primary">Agendar demonstração</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <span class="eyebrow">Plataforma de Operações Financeiras</span>
+    <h1>Toda a sua operação financeira<br>em <em>uma só plataforma</em></h1>
+    <p class="hero-sub">Centralize clientes, assinaturas e cobrança recorrente. Automatize a régua de cobrança, concilie cada pagamento e acompanhe sua receita em tempo real.</p>
+    <div class="hero-actions">
+      <a href="https://wa.me/5585987353914" class="btn btn-primary">Agendar demonstração</a>
+      <a href="#product" class="btn btn-ghost">Ver a plataforma</a>
+    </div>
+    <div class="hero-frame frame reveal">
+      <div class="frame-bar"><i></i><i></i><i></i></div>
+      <img src="/shots/dashboard.png" alt="Painel do Gestalize Finance" />
+    </div>
+  </div>
+</section>
+
+<!-- CHANNELS STRIP -->
+<div class="strip">
+  <div class="container strip-inner reveal">
+    <span class="strip-label">Funciona com os pagamentos e canais que seus clientes já usam</span>
+    <span class="strip-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Pix, boleto e cartão
+    </span>
+    <span class="strip-item">
+      <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </span>
+    <span class="strip-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+      E-mail
+    </span>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="container problem-grid">
+    <div class="reveal">
+      <span class="eyebrow">O problema</span>
+      <h2 class="h2">Operações financeiras não escalam com planilhas</h2>
+      <p class="lead" style="margin-top:1.2rem">Conforme sua base de clientes cresce, cobranças, régua e conciliação se espalham por planilhas e ferramentas desconectadas. A receita vaza, os pagamentos atrasam e a visibilidade desaparece.</p>
+    </div>
+    <div class="pain-list reveal">
+      <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Cobranças manuais e repetitivas</span></div>
+      <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Planilhas que nunca batem</span></div>
+      <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Pagamentos atrasados e perdidos</span></div>
+      <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Ferramentas de cobrança desconectadas</span></div>
+      <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Sem visibilidade de receita em tempo real</span></div>
+      <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Custo operacional crescente</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLATFORM / FEATURES -->
+<section id="platform">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Plataforma</span>
+      <h2 class="h2">Uma plataforma para toda operação financeira</h2>
+      <p class="lead" style="margin-top:1.1rem">De receita e cobrança a clientes e relatórios — os recursos que times modernos precisam para operar e crescer.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="card reveal">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <h3>Gestão de receita recorrente</h3>
+        <p>Acompanhe MRR, ARR e receita em tempo real, com uma visão clara de crescimento, churn e lucratividade.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+        <h3>Cobrança automatizada</h3>
+        <p>Automatize todo o ciclo de cobrança — da geração da fatura e do link de pagamento à conciliação.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>Gestão de assinaturas</h3>
+        <p>Rode planos mensais e anuais no automático, com ciclos flexíveis, vencimentos e cobranças combinadas.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Gestão de clientes</h3>
+        <p>Uma fonte única de verdade para cada cliente, com receita e lucro por cliente.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <h3>Relatórios em tempo real</h3>
+        <p>Painéis ao vivo e relatórios exportáveis de receita, custos, inadimplência e fluxo de caixa.</p>
+      </div>
+      <div class="card reveal">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <h3>Régua e conciliação</h3>
+        <p>Lembretes e avisos de atraso automáticos por e-mail e WhatsApp — receba em dia, sem ficar cobrando.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT PREVIEWS -->
+<section id="product" class="previews">
+  <div class="container">
+    <div class="section-head reveal" style="text-align:center; margin: 0 auto 3.5rem;">
+      <span class="eyebrow">O produto</span>
+      <h2 class="h2">Veja toda a sua operação em um só lugar</h2>
+      <p class="lead" style="margin: 1.1rem auto 0;">Telas feitas sob medida para receita, cobrança, catálogo e custos — pensadas para clareza.</p>
+    </div>
+
+    <div class="preview-lg reveal">
+      <div class="frame">
+        <div class="frame-bar"><i></i><i></i><i></i></div>
+        <img src="/shots/reporting.png" alt="Relatórios e análises financeiras" />
+      </div>
+      <div class="preview-cap"><strong>Relatórios e análises.</strong><span>Receita, MRR, lucro e inadimplência por período, com exportação em PDF.</span></div>
+    </div>
+
+    <div class="preview-row">
+      <div class="reveal">
+        <div class="frame">
+          <div class="frame-bar"><i></i><i></i><i></i></div>
+          <img src="/shots/product.png" alt="Catálogo de produtos e preços" />
+        </div>
+        <div class="preview-cap"><strong>Produtos e preços.</strong><span>Planos com valor de mensalidade e de implantação.</span></div>
+      </div>
+      <div class="reveal">
+        <div class="frame">
+          <div class="frame-bar"><i></i><i></i><i></i></div>
+          <img src="/shots/expenses.png" alt="Controle de custos e despesas" />
+        </div>
+        <div class="preview-cap"><strong>Controle de custos.</strong><span>Despesas por categoria, com lucro por cliente.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CUSTOMERS / AUDIENCE -->
+<section id="customers">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Para quem é</span>
+      <h2 class="h2">Feito para negócios com receita recorrente</h2>
+      <p class="lead" style="margin-top:1.1rem">Qualquer negócio em crescimento que precisa automatizar as operações financeiras e colocar a cobrança sob controle.</p>
+    </div>
+    <div class="aud-grid">
+      <div class="aud reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg><span>Software e SaaS</span></div>
+      <div class="aud reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>Agências</span></div>
+      <div class="aud reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>Serviços profissionais</span></div>
+      <div class="aud reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg><span>Negócios por assinatura</span></div>
+      <div class="aud reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Empresas de tecnologia</span></div>
+      <div class="aud reveal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg><span>PMEs em crescimento</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta">
+  <div class="container reveal">
+    <h2>Pronto para modernizar suas<br>operações financeiras?</h2>
+    <p>Veja como o Gestalize Finance automatiza a cobrança e dá ao seu time visibilidade financeira em tempo real.</p>
+    <div class="cta-actions">
+      <a href="https://wa.me/5585987353914" class="btn btn-primary">Agendar demonstração</a>
+      <a href="https://wa.me/5585987353914" class="btn btn-ghost">Falar com vendas</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <a href="#" class="footer-logo">
+      <img src="/gestalize-bot.png" alt="Gestalize Finance" />
+      <span>Gestalize <em>Finance</em></span>
+    </a>
+    <p>© 2026 Gestalize Systems. Todos os direitos reservados.</p>
+  </div>
+</footer>
+
+<script>
+  // Bloqueia zoom por gesto (pinça) — o iOS ignora user-scalable=no, então prevenimos aqui.
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
+  );
+
+  // Grade de pontos interativa e discreta (escondida em repouso, acende perto do cursor).
+  (function () {
+    const canvas = document.getElementById("bgDots");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const ESP = 32, RAIO = 1.4, ALCANCE = 170;
+    const A_BASE = 0.035, A_ATIVO = 0.6;
+    const FORCA = 2.8, MOLA = 0.02, ATRITO = 0.86;
+    let dots = [], mx = -9999, my = -9999, W = 0, H = 0;
+    function gerar() {
+      dots = [];
+      for (let x = ESP; x < W; x += ESP)
+        for (let y = ESP; y < H; y += ESP)
+          dots.push({ hx: x, hy: y, x, y, vx: 0, vy: 0 });
+    }
+    function dimensoes() {
+      const dpr = window.devicePixelRatio || 1;
+      W = innerWidth; H = innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      gerar();
+    }
+    addEventListener("resize", dimensoes);
+    addEventListener("mousemove", (e) => { mx = e.clientX; my = e.clientY; });
+    addEventListener("mouseout", () => { mx = -9999; my = -9999; });
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      for (const d of dots) {
+        const dx = d.x - mx, dy = d.y - my, dist = Math.hypot(dx, dy) || 0.01;
+        const prox = dist < ALCANCE ? 1 - dist / ALCANCE : 0;
+        if (prox > 0) { const f = prox * FORCA; d.vx += (dx / dist) * f; d.vy += (dy / dist) * f; }
+        d.vx += (d.hx - d.x) * MOLA; d.vy += (d.hy - d.y) * MOLA;
+        d.vx *= ATRITO; d.vy *= ATRITO; d.x += d.vx; d.y += d.vy;
+        const p = prox * prox, a = A_BASE + (A_ATIVO - A_BASE) * p;
+        if (a < 0.008) continue;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = p > 0.03 ? "#6f9bf2" : "#7d8fb3";
+        ctx.beginPath(); ctx.arc(d.x, d.y, RAIO, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(loop);
+    }
+    dimensoes(); loop();
+  })();
+
+  // Revelação no scroll, com stagger.
+  (function () {
+    const els = Array.from(document.querySelectorAll(".reveal"));
+    if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const siblings = Array.from(el.parentElement.children).filter(c => c.classList.contains("reveal"));
+        const i = siblings.indexOf(el);
+        el.style.transitionDelay = (i > 0 ? Math.min(i, 6) * 70 : 0) + "ms";
+        el.classList.add("in");
+        io.unobserve(el);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    els.forEach(e => io.observe(e));
+  })();
+</script>
+
+</body>
+</html>

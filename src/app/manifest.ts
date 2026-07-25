@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Gestalize Finance",
     short_name: "Gestalize",
     description: "Sistema financeiro e de cobranças da Gestalize Systems",
-    start_url: "/",
+    start_url: "/dashboard",
     display: "standalone",
     background_color: "#070b16",
     theme_color: "#0b1020",

@@ -5,7 +5,6 @@
 //
 // Pensado para ser chamado por um cron job diário (ver /api/cron/billing).
 
-import { addMonths, addYears, setDate } from "date-fns";
 import { prisma } from "./prisma";
 import { createCharge } from "./asaas";
 import { sendEmail, renderInvoiceEmail } from "./email";
@@ -14,13 +13,16 @@ import { toNumber } from "./utils";
 import type { BillingCycle } from "@prisma/client";
 
 export function advanceDueDate(from: Date, cycle: BillingCycle): Date {
-  return cycle === "YEARLY" ? addYears(from, 1) : addMonths(from, 1);
+  if (cycle === "YEARLY") {
+    return new Date(from.getFullYear() + 1, from.getMonth(), from.getDate());
+  }
+  return new Date(from.getFullYear(), from.getMonth() + 1, from.getDate());
 }
 
 // Ajusta a data para o "dia de vencimento" desejado (1-28).
 export function withDueDay(date: Date, dueDay: number): Date {
   const safeDay = Math.min(Math.max(dueDay, 1), 28);
-  return setDate(date, safeDay);
+  return new Date(date.getFullYear(), date.getMonth(), safeDay);
 }
 
 /**

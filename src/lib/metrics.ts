@@ -1,14 +1,17 @@
 // Agregações financeiras para o dashboard.
-import {
-  startOfMonth,
-  endOfMonth,
-  subMonths,
-  addMonths,
-  format,
-} from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { prisma } from "./prisma";
 import { toNumber, variation } from "./utils";
+
+function mStart(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+function mEnd(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999); }
+function mAdd(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, d.getDate()); }
+function mLabel(d: Date) {
+  return new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(d).replace(".", "");
+}
+function mLabelYear(d: Date) {
+  const m = new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(d).replace(".", "");
+  return `${m}/${String(d.getFullYear()).slice(2)}`;
+}
 
 async function revenueInRange(start: Date, end: Date) {
   const agg = await prisma.payment.aggregate({
@@ -64,10 +67,10 @@ export async function getMonthsWithData(): Promise<{ value: string; label: strin
 
 export async function getDashboardMetrics(refDate: Date = new Date()) {
   const now = refDate;
-  const monthStart = startOfMonth(now);
-  const monthEnd = endOfMonth(now);
-  const prevStart = startOfMonth(subMonths(now, 1));
-  const prevEnd = endOfMonth(subMonths(now, 1));
+  const monthStart = mStart(now);
+  const monthEnd = mEnd(now);
+  const prevStart = mStart(mAdd(now, -1));
+  const prevEnd = mEnd(mAdd(now, -1));
 
   const [
     revenue,
@@ -91,18 +94,14 @@ export async function getDashboardMetrics(refDate: Date = new Date()) {
   // Histórico 6 meses (receita x despesa).
   const months: { label: string; receita: number; despesa: number }[] = [];
   for (let i = 5; i >= 0; i--) {
-    const ref = subMonths(now, i);
-    const s = startOfMonth(ref);
-    const e = endOfMonth(ref);
+    const ref = mAdd(now, -i);
+    const s = mStart(ref);
+    const e = mEnd(ref);
     const [r, d] = await Promise.all([
       revenueInRange(s, e),
       expensesInRange(s, e),
     ]);
-    months.push({
-      label: format(ref, "MMM", { locale: ptBR }).replace(".", ""),
-      receita: r,
-      despesa: d,
-    });
+    months.push({ label: mLabel(ref), receita: r, despesa: d });
   }
 
   const statusMap = { PAID: 0, PENDING: 0, OVERDUE: 0, CANCELED: 0 } as Record<
@@ -153,7 +152,7 @@ export async function getUpcomingInvoices(limit = 6) {
 // Período padrão dos relatórios: últimos 6 meses.
 export function defaultReportRange() {
   const now = new Date();
-  return { start: startOfMonth(subMonths(now, 5)), end: endOfMonth(now) };
+  return { start: mStart(mAdd(now, -5)), end: mEnd(now) };
 }
 
 export async function getReportData(start: Date, end: Date) {
@@ -198,23 +197,18 @@ export async function getReportData(start: Date, end: Date) {
     despesa: number;
     lucro: number;
   }[] = [];
-  let ref = startOfMonth(start);
-  const lastMonth = startOfMonth(end);
+  let ref = mStart(start);
+  const lastMonth = mStart(end);
   let guard = 0;
   while (ref <= lastMonth && guard < 24) {
-    const s = startOfMonth(ref);
-    const e = endOfMonth(ref);
+    const s = mStart(ref);
+    const e = mEnd(ref);
     const [r, d] = await Promise.all([
       revenueInRange(s, e),
       expensesInRange(s, e),
     ]);
-    months.push({
-      label: format(ref, "MMM/yy", { locale: ptBR }).replace(".", ""),
-      receita: r,
-      despesa: d,
-      lucro: r - d,
-    });
-    ref = addMonths(ref, 1);
+    months.push({ label: mLabelYear(ref), receita: r, despesa: d, lucro: r - d });
+    ref = mAdd(ref, 1);
     guard++;
   }
 

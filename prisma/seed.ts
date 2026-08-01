@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { subMonths, startOfMonth, addDays } from "date-fns";
+
+function subMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() - n, d.getDate()); }
+function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+function addDays(d: Date, n: number) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
 
 const prisma = new PrismaClient();
 

@@ -53,6 +53,19 @@ export async function toggleProductActive(formData: FormData) {
   revalidatePath("/produtos");
 }
 
+export async function updateProductPrice(formData: FormData) {
+  const id = String(formData.get("productId"));
+  const implementationPrice = formData.get("implementationPrice");
+  await prisma.product.update({
+    where: { id },
+    data: {
+      defaultPrice: toNumber(formData.get("defaultPrice")),
+      implementationPrice: implementationPrice ? toNumber(implementationPrice) : null,
+    },
+  });
+  revalidatePath("/produtos");
+}
+
 export async function deleteProduct(formData: FormData) {
   const id = String(formData.get("productId"));
   // Só exclui de fato se não houver assinaturas vinculadas; caso contrário,

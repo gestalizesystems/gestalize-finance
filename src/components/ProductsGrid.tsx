@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Trash2, Power } from "lucide-react";
+import { X, Trash2, Power, Pencil } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { deleteProduct, toggleProductActive } from "@/app/actions";
+import { deleteProduct, toggleProductActive, updateProductPrice } from "@/app/actions";
 
 export type ProductItem = {
   id: string;
@@ -68,6 +68,8 @@ function ProductModal({
   product: ProductItem;
   onClose: () => void;
 }) {
+  const [editingPrice, setEditingPrice] = useState(false);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -105,22 +107,71 @@ function ProductModal({
           {product.description || "Sem descrição."}
         </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-ink-700 bg-ink-900 p-4">
-            <p className="text-xs text-slate-500">Mensalidade</p>
-            <p className="mt-1 text-xl font-bold text-white">
-              {formatCurrency(product.defaultPrice)}
-            </p>
+        {editingPrice ? (
+          <form
+            action={updateProductPrice}
+            onSubmit={() => setEditingPrice(false)}
+            className="mt-5 grid grid-cols-2 gap-3"
+          >
+            <input type="hidden" name="productId" value={product.id} />
+            <div>
+              <label className="text-xs text-slate-500">Mensalidade (R$)</label>
+              <input
+                name="defaultPrice"
+                type="number"
+                step="0.01"
+                required
+                defaultValue={product.defaultPrice}
+                className="input mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500">Implantação (R$)</label>
+              <input
+                name="implementationPrice"
+                type="number"
+                step="0.01"
+                defaultValue={product.implementationPrice ?? ""}
+                className="input mt-1"
+              />
+            </div>
+            <div className="col-span-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingPrice(false)}
+                className="btn-ghost"
+              >
+                Cancelar
+              </button>
+              <button className="btn-primary">Salvar</button>
+            </div>
+          </form>
+        ) : (
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-ink-700 bg-ink-900 p-4">
+              <p className="text-xs text-slate-500">Mensalidade</p>
+              <p className="mt-1 text-xl font-bold text-white">
+                {formatCurrency(product.defaultPrice)}
+              </p>
+            </div>
+            <div className="rounded-xl border border-ink-700 bg-ink-900 p-4">
+              <p className="text-xs text-slate-500">Implantação</p>
+              <p className="mt-1 text-xl font-bold text-white">
+                {product.implementationPrice
+                  ? formatCurrency(product.implementationPrice)
+                  : "—"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingPrice(true)}
+              className="btn-ghost col-span-2 justify-center"
+            >
+              <Pencil className="h-4 w-4" />
+              Alterar valor
+            </button>
           </div>
-          <div className="rounded-xl border border-ink-700 bg-ink-900 p-4">
-            <p className="text-xs text-slate-500">Implantação</p>
-            <p className="mt-1 text-xl font-bold text-white">
-              {product.implementationPrice
-                ? formatCurrency(product.implementationPrice)
-                : "—"}
-            </p>
-          </div>
-        </div>
+        )}
 
         <p className="mt-3 text-sm text-slate-400">
           {product.subscriptions} assinatura(s) ativa(s) vinculada(s).

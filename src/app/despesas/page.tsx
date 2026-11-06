@@ -1,8 +1,10 @@
 import { Trash2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, toNumber } from "@/lib/utils";
+import { getMonthsWithData } from "@/lib/metrics";
 import { PageHeader } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
+import { MonthFilter } from "@/components/MonthFilter";
 import { createCost, deleteCost } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -19,33 +21,54 @@ const categoryLabel: Record<string, string> = {
   OTHER: "Outro",
 };
 
+function monthRange(month?: string) {
+  if (!month) return null;
+  const [y, m] = month.split("-").map(Number);
+  if (!y || !m) return null;
+  return { gte: new Date(y, m - 1, 1), lt: new Date(y, m, 1) };
+}
+
 export default async function DespesasPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: { page?: string; month?: string };
 }) {
   const page = Math.max(1, Number(searchParams.page) || 1);
+  const month = searchParams.month;
+  const range = monthRange(month);
+  const where = range ? { date: range } : {};
 
-  const [total, costs, clients, totalAgg] = await Promise.all([
-    prisma.cost.count(),
+  const [total, costs, clients, totalAgg, monthsWithData] = await Promise.all([
+    prisma.cost.count({ where }),
     prisma.cost.findMany({
+      where,
       orderBy: { date: "desc" },
       include: { client: true },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),
     prisma.client.findMany({ orderBy: { name: "asc" } }),
-    prisma.cost.aggregate({ _sum: { amount: true } }),
+    prisma.cost.aggregate({ where, _sum: { amount: true } }),
+    getMonthsWithData(),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const totalAmount = toNumber(totalAgg._sum.amount);
-  const hrefForPage = (p: number) => `/despesas?page=${p}`;
+  const hrefForPage = (p: number) => {
+    const params = new URLSearchParams();
+    if (month) params.set("month", month);
+    params.set("page", String(p));
+    return `/despesas?${params.toString()}`;
+  };
   const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Despesas" subtitle="Custos por sistema, ferramentas, servidores e fixos." />
+      <PageHeader
+        title="Despesas"
+        subtitle="Custos por sistema, ferramentas, servidores e fixos."
+        action={<MonthFilter months={monthsWithData} />}
+      />
 
       <form action={createCost} className="card space-y-3">
         <div className="grid grid-cols-1 gap-3 overflow-hidden sm:grid-cols-2 lg:grid-cols-3">
@@ -76,7 +99,8 @@ export default async function DespesasPage({
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-semibold text-white">Histórico</h3>
           <span className="text-sm text-slate-400">
-            Total geral: <span className="font-semibold text-negative">{formatCurrency(totalAmount)}</span>
+            {month ? "Total no período" : "Total geral"}:{" "}
+            <span className="font-semibold text-negative">{formatCurrency(totalAmount)}</span>
           </span>
         </div>
         <table className="w-full text-sm">

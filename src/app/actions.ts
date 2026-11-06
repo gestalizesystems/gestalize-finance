@@ -10,6 +10,7 @@ import { setSettings, SETTING_KEYS } from "@/lib/settings";
 import { toNumber } from "@/lib/utils";
 import {
   generateDueInvoices,
+  sendDueDateReminders,
   markOverdueInvoices,
   registerPayment,
 } from "@/lib/billing";
@@ -288,6 +289,7 @@ export async function saveCompanySettings(formData: FormData) {
 // Executa o motor de cobrança manualmente (também roda no cron).
 export async function runBilling() {
   await generateDueInvoices(3); // gera com 3 dias de antecedência
+  await sendDueDateReminders(); // lembrete no dia do vencimento
   await markOverdueInvoices();
   revalidatePath("/cobrancas");
   revalidatePath("/");

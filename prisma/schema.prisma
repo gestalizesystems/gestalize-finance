@@ -139,6 +139,7 @@ model Invoice {
   paymentLink    String? // link de checkout do gateway
   externalId     String? // id da cobrança no gateway
   paidAt         DateTime?
+  dueReminderSentAt DateTime? // lembrete enviado no dia do vencimento
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 

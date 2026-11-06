@@ -138,6 +138,70 @@ export async function generateDueInvoices(horizonDays = 0) {
   return created;
 }
 
+/**
+ * Envia lembrete (e-mail + WhatsApp) no dia do vencimento das faturas
+ * ainda pendentes. Idempotente: marca `dueReminderSentAt` para não
+ * reenviar caso o motor seja rodado mais de uma vez no mesmo dia.
+ */
+export async function sendDueDateReminders() {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      status: "PENDING",
+      dueDate: { gte: startOfDay, lt: endOfDay },
+      dueReminderSentAt: null,
+    },
+    include: { client: true },
+  });
+
+  const notified: string[] = [];
+
+  for (const invoice of invoices) {
+    if (invoice.client.email) {
+      try {
+        const { subject, html } = await renderInvoiceEmail({
+          clientName: invoice.client.name,
+          description: invoice.description,
+          amount: invoice.amount,
+          dueDate: invoice.dueDate,
+          paymentLink: invoice.paymentLink,
+        });
+        await sendEmail({ to: invoice.client.email, subject, html });
+      } catch (err) {
+        console.error("Falha ao enviar lembrete de vencimento por e-mail:", err);
+      }
+    }
+
+    if (invoice.client.phone) {
+      try {
+        const message = await renderInvoiceWhatsApp({
+          clientName: invoice.client.name,
+          description: invoice.description,
+          amount: invoice.amount,
+          dueDate: invoice.dueDate,
+          paymentLink: invoice.paymentLink,
+        });
+        await sendWhatsApp({ phone: invoice.client.phone, message });
+      } catch (err) {
+        console.error("Falha ao enviar lembrete de vencimento por WhatsApp:", err);
+      }
+    }
+
+    await prisma.invoice.update({
+      where: { id: invoice.id },
+      data: { dueReminderSentAt: new Date() },
+    });
+
+    notified.push(invoice.id);
+  }
+
+  return notified;
+}
+
 /** Marca como OVERDUE as faturas PENDING que já passaram do vencimento. */
 export async function markOverdueInvoices() {
   const now = new Date();

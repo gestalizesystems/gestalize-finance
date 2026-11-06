@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { generateDueInvoices, markOverdueInvoices } from "@/lib/billing";
+import {
+  generateDueInvoices,
+  sendDueDateReminders,
+  markOverdueInvoices,
+} from "@/lib/billing";
 
 // Endpoint para o cron job diário.
 // Em produção, proteja com um header secreto (CRON_SECRET) e agende via
@@ -14,11 +18,13 @@ export async function GET(req: Request) {
   }
 
   const created = await generateDueInvoices(3);
+  const reminded = await sendDueDateReminders();
   const overdue = await markOverdueInvoices();
 
   return NextResponse.json({
     ok: true,
     invoicesCreated: created.length,
+    dueDateRemindersSent: reminded.length,
     invoicesMarkedOverdue: overdue,
     ranAt: new Date().toISOString(),
   });

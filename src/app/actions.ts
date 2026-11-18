@@ -142,6 +142,20 @@ export async function cancelSubscription(formData: FormData) {
   revalidatePath("/assinaturas");
 }
 
+// Muda a data da próxima cobrança. As cobranças seguintes continuam a
+// partir dela (mesmo dia do mês, a cada ciclo).
+export async function updateSubscriptionDueDate(formData: FormData) {
+  const id = String(formData.get("subscriptionId"));
+  const raw = String(formData.get("nextDueDate") || "");
+  if (!raw) return;
+  const nextDueDate = new Date(`${raw}T00:00:00`);
+  await prisma.subscription.update({
+    where: { id },
+    data: { nextDueDate, dueDay: Math.min(Math.max(nextDueDate.getDate(), 1), 28) },
+  });
+  revalidatePath("/assinaturas");
+}
+
 // Exclui a assinatura. As faturas já geradas são preservadas (desvinculadas).
 export async function deleteSubscription(formData: FormData) {
   const id = String(formData.get("subscriptionId"));

@@ -1,9 +1,14 @@
-import { Ban, Trash2 } from "lucide-react";
+import { Ban, Trash2, Save } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { PageHeader } from "@/components/ui";
 import { Pagination } from "@/components/Pagination";
-import { createSubscription, cancelSubscription, deleteSubscription } from "../actions";
+import {
+  createSubscription,
+  cancelSubscription,
+  deleteSubscription,
+  updateSubscriptionDueDate,
+} from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +95,23 @@ export default async function AssinaturasPage({
                 <td className="py-3.5 pr-4">{s.product.name}</td>
                 <td className="py-3.5 pr-4 font-semibold text-white">{formatCurrency(s.amount)}</td>
                 <td className="py-3.5 pr-4">{s.cycle === "YEARLY" ? "Anual" : "Mensal"}</td>
-                <td className="py-3.5 pr-4">{formatDate(s.nextDueDate)}</td>
+                <td className="py-3.5 pr-4">
+                  <form action={updateSubscriptionDueDate} className="flex items-center gap-1.5">
+                    <input type="hidden" name="subscriptionId" value={s.id} />
+                    <input
+                      type="date"
+                      name="nextDueDate"
+                      defaultValue={s.nextDueDate.toLocaleDateString("en-CA")}
+                      className="input h-8 w-[9.5rem] px-2 text-xs"
+                    />
+                    <button
+                      title="Salvar nova data de vencimento"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-ink-700 bg-ink-850 text-slate-300 hover:bg-ink-800"
+                    >
+                      <Save className="h-3.5 w-3.5" />
+                    </button>
+                  </form>
+                </td>
                 <td className="py-3.5 pr-4">
                   <span className={`badge ${subStatus[s.status]}`}>
                     {s.status === "ACTIVE" ? "Ativa" : s.status === "PAUSED" ? "Pausada" : "Cancelada"}

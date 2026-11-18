@@ -17,7 +17,10 @@ export type ProductItem = {
 };
 
 export function ProductsGrid({ products }: { products: ProductItem[] }) {
-  const [selected, setSelected] = useState<ProductItem | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Busca sempre na lista atual (prop), em vez de guardar uma cópia
+  // congelada — assim o modal reflete o valor salvo após revalidatePath.
+  const selected = selectedId ? products.find((p) => p.id === selectedId) ?? null : null;
 
   return (
     <>
@@ -25,7 +28,7 @@ export function ProductsGrid({ products }: { products: ProductItem[] }) {
         {products.map((p) => (
           <button
             key={p.id}
-            onClick={() => setSelected(p)}
+            onClick={() => setSelectedId(p.id)}
             className="card text-left transition-colors hover:border-brand/50 hover:bg-ink-800"
           >
             <div className="flex items-start justify-between gap-2">
@@ -55,7 +58,7 @@ export function ProductsGrid({ products }: { products: ProductItem[] }) {
       </div>
 
       {selected && (
-        <ProductModal product={selected} onClose={() => setSelected(null)} />
+        <ProductModal product={selected} onClose={() => setSelectedId(null)} />
       )}
     </>
   );

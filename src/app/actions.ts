@@ -56,14 +56,23 @@ export async function toggleProductActive(formData: FormData) {
 export async function updateProductPrice(formData: FormData) {
   const id = String(formData.get("productId"));
   const implementationPrice = formData.get("implementationPrice");
+  const defaultPrice = toNumber(formData.get("defaultPrice"));
   await prisma.product.update({
     where: { id },
     data: {
-      defaultPrice: toNumber(formData.get("defaultPrice")),
+      defaultPrice,
       implementationPrice: implementationPrice ? toNumber(implementationPrice) : null,
     },
   });
+  // Assinaturas ativas travam o valor no momento da criação; ao mudar o
+  // preço do produto, atualiza também as mensalidades já em andamento
+  // para que as próximas cobranças saiam no novo valor.
+  await prisma.subscription.updateMany({
+    where: { productId: id, status: "ACTIVE" },
+    data: { amount: defaultPrice },
+  });
   revalidatePath("/produtos");
+  revalidatePath("/assinaturas");
 }
 
 export async function deleteProduct(formData: FormData) {
